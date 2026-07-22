@@ -56,10 +56,10 @@ tilt_front_height = 4.0;
 saddle_depth = 1.5;
 // Saddle: radius of the front/back valley cylinder (axis left-right)
 saddle_radius = 20;
-// Thumb: angle of the front bevel cut
-thumb_bevel_angle = 17;
-// Thumb: bevel hinge, this far in front of the cap center
-thumb_bevel_start = 1.0;
+// Thumb: radius of the convex front roll-off (waterfall)
+thumb_roll_radius = 22;
+// Thumb: roll-off starts this far behind the cap center
+thumb_roll_hinge = 2.0;
 
 /* [Shell] */
 // Wall thickness at the bottom rim
@@ -192,20 +192,27 @@ module saddle_dish() {
                 cylinder(r = saddle_radius, h = 60, center = true);
 }
 
-// Thumb: crisp bevel plane dropping the front of the top.
-module thumb_cut() {
-    top_frame()
-        translate([0, -thumb_bevel_start, 0])
-            rotate([thumb_bevel_angle, 0, 0])
-                translate([0, 0, 50])
-                    cube([80, 80, 100], center = true);
+// Thumb keep-region: behind the hinge everything is kept; in front,
+// the top rolls off over a convex cylinder (axis left-right) so the
+// surface falls away smoothly toward the front edge, like the
+// original Lamé thumb. The dish still scoops the back half.
+module thumb_keep() {
+    top_frame() {
+        translate([0, thumb_roll_hinge, -thumb_roll_radius])
+            rotate([0, 90, 0])
+                cylinder(r = thumb_roll_radius, h = 80, center = true);
+        translate([0, thumb_roll_hinge + 40, 0])
+            cube([80, 80, 90], center = true);
+    }
 }
 
 module cap_top() {
     difference() {
-        cap_body();
+        intersection() {
+            cap_body();
+            if (variant == "thumb") thumb_keep();
+        }
         if (is_saddle) saddle_dish(); else dish_sphere();
-        if (variant == "thumb") thumb_cut();
     }
 }
 
