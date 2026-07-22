@@ -27,9 +27,8 @@ key_units = 1; // [1:0.25:2]
 // for the deep thumb variants.
 key_units_y = 1; // [1:0.25:2]
 // Top profile variant. thumb = 1U dome waterfall; thumb_slope spreads
-// that slope over the whole (deep) cap; thumb_flat keeps a flat back
-// plateau and drops the same slope only at the front.
-variant = "normal"; // [normal, tilted, thumb, thumb_slope, thumb_flat, saddle, saddle_tilted]
+// that slope over the whole (deep) cap for wide/deep thumb keys.
+variant = "normal"; // [normal, tilted, thumb, thumb_slope, saddle, saddle_tilted]
 // Homing feature on the touch surface
 homing = "none"; // [none, bar, dots]
 
@@ -70,11 +69,6 @@ thumb_crest_drop = 0.2;
 // Thumb: extra body height at the back, tilted-style, so the surface
 // falls from a high back edge down to a low front
 thumb_back_rise = 0.8;
-// thumb_flat: length of the front waterfall (mm); the rest of the top
-// stays a flat plateau at the crown
-thumb_flat_run = 11;
-// thumb_flat: radius of the front waterfall roll (smaller = steeper)
-thumb_flat_radius = 24;
 
 /* [Shell] */
 // Wall thickness at the bottom rim
@@ -129,8 +123,7 @@ cavity_depth = stem_type == "choc" ? 2.05 : 2.0;
 is_tilted = variant == "tilted" || variant == "saddle_tilted";
 is_saddle = variant == "saddle" || variant == "saddle_tilted";
 // dome-shaped thumbs (convex crest + waterfall)
-is_thumb_dome = variant == "thumb" || variant == "thumb_slope";
-is_thumb = is_thumb_dome || variant == "thumb_flat";
+is_thumb = variant == "thumb" || variant == "thumb_slope";
 
 top_w = cap_w - 2 * top_inset;
 top_d = cap_d - 2 * top_inset;
@@ -231,29 +224,11 @@ module thumb_dome_keep() {
                 sphere(r = thumb_dome_radius);
 }
 
-// Flat thumb keep-region: the back stays a flat plateau at the crown;
-// only the front `thumb_flat_run` mm waterfalls off, over a convex
-// cylinder tangent to the plateau — so the drop keeps the 1U thumb's
-// slope while the added length is flat.
-module thumb_flat_keep() {
-    hinge = -cap_d / 2 + thumb_flat_run;
-    top_frame() {
-        // flat plateau: everything behind the hinge (cap_body caps the top)
-        translate([0, hinge + 50, 0])
-            cube([2 * cap_w + 40, 100, 200], center = true);
-        // front roll-off: cylinder tangent to the crown at the hinge
-        translate([0, hinge, -thumb_flat_radius])
-            rotate([0, 90, 0])
-                cylinder(r = thumb_flat_radius, h = 2 * cap_w + 40, center = true);
-    }
-}
-
 module cap_top() {
     difference() {
         intersection() {
             cap_body();
-            if (is_thumb_dome) thumb_dome_keep();
-            if (variant == "thumb_flat") thumb_flat_keep();
+            if (is_thumb) thumb_dome_keep();
         }
         if (!is_thumb) {
             if (is_saddle) saddle_dish(); else dish_sphere();

@@ -20,9 +20,8 @@ declare -A VARIANTS=(
   [Saddle_Homing]='-D variant="saddle" -D homing="bar"'
   [Saddle_Tilted]='-D variant="saddle_tilted"'
   [1.5U_Normal]='-D variant="normal" -D key_units=1.5'
-  # 1.5U-deep thumb keys (stretched front-to-back). Flat = flat back
-  # plateau + front waterfall; Slope = one continuous distributed slope.
-  [1.5U_Thumb_Flat]='-D variant="thumb_flat" -D key_units_y=1.5'
+  # 1.5U-deep thumb key (stretched front-to-back): one continuous slope
+  # from a high back to a low front, distributed over the whole length.
   [1.5U_Thumb_Slope]='-D variant="thumb_slope" -D key_units_y=1.5'
 )
 
