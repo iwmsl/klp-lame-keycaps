@@ -56,10 +56,15 @@ tilt_front_height = 4.0;
 saddle_depth = 1.5;
 // Saddle: radius of the front/back valley cylinder (axis left-right)
 saddle_radius = 20;
-// Thumb: radius of the convex front roll-off (waterfall)
-thumb_roll_radius = 22;
-// Thumb: roll-off starts this far behind the cap center
-thumb_roll_hinge = 2.0;
+// Thumb: radius of the convex dome (bigger = flatter crest)
+thumb_dome_radius = 30;
+// Thumb: horizontal stretch of the dome (softens left-right falloff)
+thumb_dome_sx = 1.5;
+// Thumb: crest height below the crown
+thumb_crest_drop = 0.6;
+// Thumb: crest sits this far behind the cap center, so the surface
+// waterfalls more strongly toward the front
+thumb_crest_back = 2.0;
 
 /* [Shell] */
 // Wall thickness at the bottom rim
@@ -192,18 +197,15 @@ module saddle_dish() {
                 cylinder(r = saddle_radius, h = 60, center = true);
 }
 
-// Thumb keep-region: behind the hinge everything is kept; in front,
-// the top rolls off over a convex cylinder (axis left-right) so the
-// surface falls away smoothly toward the front edge, like the
-// original Lamé thumb. The dish still scoops the back half.
+// Thumb keep-region: a single convex ellipsoid — no dish at all.
+// The top bulges to a crest behind the cap center and waterfalls
+// smoothly toward the front, with a gentle left-right barrel.
+// One surface, no creases.
 module thumb_keep() {
-    top_frame() {
-        translate([0, thumb_roll_hinge, -thumb_roll_radius])
-            rotate([0, 90, 0])
-                cylinder(r = thumb_roll_radius, h = 80, center = true);
-        translate([0, thumb_roll_hinge + 40, 0])
-            cube([80, 80, 90], center = true);
-    }
+    top_frame()
+        translate([0, thumb_crest_back, -thumb_crest_drop - thumb_dome_radius])
+            scale([thumb_dome_sx, 1, 1])
+                sphere(r = thumb_dome_radius);
 }
 
 module cap_top() {
@@ -212,7 +214,9 @@ module cap_top() {
             cap_body();
             if (variant == "thumb") thumb_keep();
         }
-        if (is_saddle) saddle_dish(); else dish_sphere();
+        if (variant != "thumb") {
+            if (is_saddle) saddle_dish(); else dish_sphere();
+        }
     }
 }
 
