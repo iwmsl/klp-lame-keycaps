@@ -23,8 +23,13 @@ stem_type = "choc"; // [choc, mx]
 size_type = "choc"; // [choc, mx]
 // Key width in units (1.5U is stretched horizontally, stem centered)
 key_units = 1; // [1:0.25:2]
-// Top profile variant
-variant = "normal"; // [normal, tilted, thumb, saddle, saddle_tilted]
+// Key depth in units (stretched front-to-back, stem centered). Used
+// for the deep thumb variants.
+key_units_y = 1; // [1:0.25:2]
+// Top profile variant. thumb = 1U dome waterfall; thumb_slope spreads
+// that slope over the whole (deep) cap; thumb_flat keeps a flat back
+// plateau and drops the same slope only at the front.
+variant = "normal"; // [normal, tilted, thumb, thumb_slope, thumb_flat, saddle, saddle_tilted]
 // Homing feature on the touch surface
 homing = "none"; // [none, bar, dots]
 
@@ -65,6 +70,11 @@ thumb_crest_drop = 0.2;
 // Thumb: extra body height at the back, tilted-style, so the surface
 // falls from a high back edge down to a low front
 thumb_back_rise = 0.8;
+// thumb_flat: length of the front waterfall (mm); the rest of the top
+// stays a flat plateau at the crown
+thumb_flat_run = 11;
+// thumb_flat: radius of the front waterfall roll (smaller = steeper)
+thumb_flat_radius = 24;
 
 /* [Shell] */
 // Wall thickness at the bottom rim
@@ -101,13 +111,16 @@ eps = 0.01;
 //   1.5U choc: 26.5 x 16.5 mm (= 17.5 + 0.5 * 18 mm pitch), as in the
 //   original 1.5U models. Wider caps grow along X, stem stays centered.
 base_w = size_type == "choc" ? 17.5 : 18.0;
+base_d = size_type == "choc" ? 16.5 : 18.0;
 pitch_x = size_type == "choc" ? 18.0 : 19.05;
-cap_w = base_w + (key_units - 1) * pitch_x;
-cap_d = size_type == "choc" ? 16.5 : 18.0;
+pitch_y = size_type == "choc" ? 17.0 : 19.05;
+cap_w = base_w + (key_units   - 1) * pitch_x;
+cap_d = base_d + (key_units_y - 1) * pitch_y;
 
-// The dish is stretched horizontally with the cap so wide caps keep
-// the same scoop character (matches the original 1.5U models).
+// The dish/dome is stretched with the cap so bigger caps keep the same
+// scoop/slope character (matches the original 1.5U models).
 dish_sx = cap_w / base_w;
+dish_sy = cap_d / base_d;
 
 // Cavity depth (bottom rim -> ceiling), from the originals:
 //   choc stem: 2.05 mm, mx stem: 2.0 mm
@@ -115,6 +128,9 @@ cavity_depth = stem_type == "choc" ? 2.05 : 2.0;
 
 is_tilted = variant == "tilted" || variant == "saddle_tilted";
 is_saddle = variant == "saddle" || variant == "saddle_tilted";
+// dome-shaped thumbs (convex crest + waterfall)
+is_thumb_dome = variant == "thumb" || variant == "thumb_slope";
+is_thumb = is_thumb_dome || variant == "thumb_flat";
 
 top_w = cap_w - 2 * top_inset;
 top_d = cap_d - 2 * top_inset;
@@ -146,8 +162,8 @@ module plate(w, d, r) {
 tilt_front_h = tilt_front_height + (variant == "saddle_tilted" ? 0.3 : 0);
 
 // Effective crown height: the thumb body is a little taller so its
-// waterfall can start from a tilted-like high back edge.
-crown_h = crown_height + (variant == "thumb" ? thumb_back_rise : 0);
+// waterfall / plateau sits at a tilted-like high back edge.
+crown_h = crown_height + (is_thumb ? thumb_back_rise : 0);
 
 // Places children from top-plane local coordinates (origin at cap
 // center projected on the crown, z = 0 at the crown) into global
@@ -201,24 +217,45 @@ module saddle_dish() {
                 cylinder(r = saddle_radius, h = 60, center = true);
 }
 
-// Thumb keep-region: a single convex ellipsoid — no dish at all.
+// Dome thumb keep-region: a single convex ellipsoid — no dish at all.
 // The crest sits on the raised back edge of the top face and the
-// surface waterfalls monotonically down to a low front, with a
-// gentle left-right barrel. One surface, no creases.
-module thumb_keep() {
+// surface waterfalls monotonically down to a low front, with a gentle
+// left-right barrel. One surface, no creases. For deep (thumb_slope)
+// caps the dome is stretched front-to-back (sy) so the same slope is
+// spread — "distributed" — over the whole length.
+module thumb_dome_keep() {
+    sy = variant == "thumb_slope" ? dish_sy : 1;
     top_frame()
         translate([0, top_d / 2, -thumb_crest_drop - thumb_dome_radius])
-            scale([thumb_dome_sx, 1, 1])
+            scale([thumb_dome_sx, sy, 1])
                 sphere(r = thumb_dome_radius);
+}
+
+// Flat thumb keep-region: the back stays a flat plateau at the crown;
+// only the front `thumb_flat_run` mm waterfalls off, over a convex
+// cylinder tangent to the plateau — so the drop keeps the 1U thumb's
+// slope while the added length is flat.
+module thumb_flat_keep() {
+    hinge = -cap_d / 2 + thumb_flat_run;
+    top_frame() {
+        // flat plateau: everything behind the hinge (cap_body caps the top)
+        translate([0, hinge + 50, 0])
+            cube([2 * cap_w + 40, 100, 200], center = true);
+        // front roll-off: cylinder tangent to the crown at the hinge
+        translate([0, hinge, -thumb_flat_radius])
+            rotate([0, 90, 0])
+                cylinder(r = thumb_flat_radius, h = 2 * cap_w + 40, center = true);
+    }
 }
 
 module cap_top() {
     difference() {
         intersection() {
             cap_body();
-            if (variant == "thumb") thumb_keep();
+            if (is_thumb_dome) thumb_dome_keep();
+            if (variant == "thumb_flat") thumb_flat_keep();
         }
-        if (variant != "thumb") {
+        if (!is_thumb) {
             if (is_saddle) saddle_dish(); else dish_sphere();
         }
     }
