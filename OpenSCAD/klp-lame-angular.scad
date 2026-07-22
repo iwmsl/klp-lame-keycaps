@@ -56,15 +56,15 @@ tilt_front_height = 4.0;
 saddle_depth = 1.5;
 // Saddle: radius of the front/back valley cylinder (axis left-right)
 saddle_radius = 20;
-// Thumb: radius of the convex dome (bigger = flatter crest)
-thumb_dome_radius = 30;
+// Thumb: radius of the convex waterfall (bigger = straighter ramp)
+thumb_dome_radius = 38;
 // Thumb: horizontal stretch of the dome (softens left-right falloff)
 thumb_dome_sx = 1.5;
-// Thumb: crest height below the crown
-thumb_crest_drop = 0.6;
-// Thumb: crest sits this far behind the cap center, so the surface
-// waterfalls more strongly toward the front
-thumb_crest_back = 2.0;
+// Thumb: crest height below the (raised) crown
+thumb_crest_drop = 0.2;
+// Thumb: extra body height at the back, tilted-style, so the surface
+// falls from a high back edge down to a low front
+thumb_back_rise = 0.8;
 
 /* [Shell] */
 // Wall thickness at the bottom rim
@@ -145,6 +145,10 @@ module plate(w, d, r) {
 // tilted form starts a touch higher to keep the front skirt printable.
 tilt_front_h = tilt_front_height + (variant == "saddle_tilted" ? 0.3 : 0);
 
+// Effective crown height: the thumb body is a little taller so its
+// waterfall can start from a tilted-like high back edge.
+crown_h = crown_height + (variant == "thumb" ? thumb_back_rise : 0);
+
 // Places children from top-plane local coordinates (origin at cap
 // center projected on the crown, z = 0 at the crown) into global
 // coordinates. Tilted variants hinge about the front footprint edge.
@@ -155,7 +159,7 @@ module top_frame() {
                 translate([0, cap_d / 2, 0])
                     children();
     else
-        translate([0, 0, crown_height]) children();
+        translate([0, 0, crown_h]) children();
 }
 
 // ------------------------------------------------------------------
@@ -198,12 +202,12 @@ module saddle_dish() {
 }
 
 // Thumb keep-region: a single convex ellipsoid — no dish at all.
-// The top bulges to a crest behind the cap center and waterfalls
-// smoothly toward the front, with a gentle left-right barrel.
-// One surface, no creases.
+// The crest sits on the raised back edge of the top face and the
+// surface waterfalls monotonically down to a low front, with a
+// gentle left-right barrel. One surface, no creases.
 module thumb_keep() {
     top_frame()
-        translate([0, thumb_crest_back, -thumb_crest_drop - thumb_dome_radius])
+        translate([0, top_d / 2, -thumb_crest_drop - thumb_dome_radius])
             scale([thumb_dome_sx, 1, 1])
                 sphere(r = thumb_dome_radius);
 }
