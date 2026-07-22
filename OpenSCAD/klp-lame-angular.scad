@@ -27,39 +27,42 @@ homing = "none"; // [none, bar, dots]
 
 /* [Body] */
 // Corner radius of the bottom footprint (small = more angular)
-corner_radius = 1.2;
+corner_radius = 2.2;
 // Corner radius of the top face
-top_corner_radius = 1.0;
+top_corner_radius = 2.0;
 // How much each side face leans in from bottom to top (per side)
-top_inset = 1.6;
-// Height of the top plane (at its corners) above the bottom rim, non-tilted
-cap_height = 3.9;
-// Chamfer against elephant foot at the outer bottom edge
-foot_chamfer = 0.2;
+top_inset = 1.75;
+// Height of the body crown (before the dish is carved) above the rim.
+// The dish removes the crown entirely, leaving winged front/back lips.
+cap_height = 5.0;
+// Fillet radius applied to all body edges (0 = crisp/faceted look)
+edge_fillet = 1.4;
 
 /* [Top surface] */
-// Depth of the main dish across the front/back direction
-dish_depth = 0.75;
-// Radius of the main dish cylinder (axis left-right)
-dish_radius = 30;
-// Depth of the cross dish (left-right direction)
-cross_dish_depth = 0.3;
+// Depth of the main valley below the crown. Deep enough to span the
+// whole top, so the front/back lips rise above the side silhouette
+// like the original Lamé profile.
+dish_depth = 1.85;
+// Radius of the main valley cylinder (axis left-right)
+dish_radius = 18;
+// Depth of the cross dish below the crown (trims the lip centers)
+cross_dish_depth = 1.0;
 // Radius of the cross dish cylinder (axis front-back)
-cross_dish_radius = 55;
+cross_dish_radius = 45;
 // Tilt angle for tilted variants (matches original 15)
 tilt_angle = 15;
-// Height of the top plane at the front footprint edge for tilted variants
-tilt_front_height = 3.0;
-// Saddle: how far the convex roll-off apex sits below the top plane
-saddle_center_drop = 0.2;
+// Height of the crown plane at the front footprint edge for tilted variants
+tilt_front_height = 3.5;
+// Saddle: how far the convex roll-off apex sits below the crown
+saddle_center_drop = 1.35;
 // Saddle: radius of the convex front/back roll-off
 saddle_radius = 26;
-// Saddle: deeper cross dish so the sides stay proud of the center
-saddle_cross_depth = 0.5;
+// Saddle: cross dish depth below the crown
+saddle_cross_depth = 1.85;
 // Thumb: angle of the front bevel cut
-thumb_bevel_angle = 12;
+thumb_bevel_angle = 15;
 // Thumb: bevel starts this far in front of the cap center
-thumb_bevel_start = 2.0;
+thumb_bevel_start = 0.5;
 
 /* [Shell] */
 // Wall thickness at the bottom rim
@@ -133,12 +136,17 @@ module plate(w, d, r) {
     linear_extrude(eps) rrect(w, d, r);
 }
 
+// Front height of the tilted crown. The saddle roll-off digs much
+// deeper than the plain dish, so saddle_tilted starts higher to keep
+// the front skirt clear of the cavity.
+tilt_front_h = tilt_front_height + (variant == "saddle_tilted" ? 1.5 : 0);
+
 // Places children from top-plane local coordinates (origin at cap
 // center projected on the top plane, z = 0 on the plane) into global
 // coordinates. Tilted variants hinge about the front footprint edge.
 module top_frame() {
     if (is_tilted)
-        translate([0, -cap_d / 2, tilt_front_height])
+        translate([0, -cap_d / 2, tilt_front_h])
             rotate([tilt_angle, 0, 0])
                 translate([0, cap_d / 2, 0])
                     children();
@@ -149,12 +157,30 @@ module top_frame() {
 // ------------------------------------------------------------------
 // Cap body
 // ------------------------------------------------------------------
+// A rounded slab: rounded rectangle swept with a sphere of radius rr,
+// so every edge of the hulled body comes out filleted. The slab's
+// widest point (equator) matches w x d, its top sits rr above z = 0.
+module pillow(w, d, r, rr) {
+    if (rr > 0)
+        minkowski() {
+            linear_extrude(eps)
+                rrect(w - 2 * rr, d - 2 * rr, max(r - rr, 0.1));
+            sphere(r = rr, $fn = 44);
+        }
+    else
+        plate(w, d, r);
+}
+
 module cap_body() {
-    hull() {
-        plate(cap_w - 2 * foot_chamfer, cap_d - 2 * foot_chamfer, corner_radius);
-        translate([0, 0, foot_chamfer])
-            plate(cap_w, cap_d, corner_radius);
-        top_frame() plate(top_w, top_d, top_corner_radius);
+    intersection() {
+        hull() {
+            pillow(cap_w, cap_d, corner_radius, edge_fillet);
+            top_frame() translate([0, 0, -edge_fillet])
+                pillow(top_w, top_d, top_corner_radius, edge_fillet);
+        }
+        // flat bottom: cut exactly at the pillow equator, keeping the
+        // full footprint and a clean rim
+        translate([0, 0, 25]) cube([50, 50, 50], center = true);
     }
 }
 
