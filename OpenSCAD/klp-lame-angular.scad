@@ -21,6 +21,8 @@
 stem_type = "choc"; // [choc, mx]
 // Keycap footprint size
 size_type = "choc"; // [choc, mx]
+// Key width in units (1.5U is stretched horizontally, stem centered)
+key_units = 1; // [1:0.25:2]
 // Top profile variant
 variant = "normal"; // [normal, tilted, thumb, saddle, saddle_tilted]
 // Homing feature on the touch surface
@@ -91,8 +93,16 @@ eps = 0.01;
 // ------------------------------------------------------------------
 // Footprints measured from the original STLs:
 //   choc size: 17.5 x 16.5 mm, mx size: 18 x 18 mm
-cap_w = size_type == "choc" ? 17.5 : 18.0;
+//   1.5U choc: 26.5 x 16.5 mm (= 17.5 + 0.5 * 18 mm pitch), as in the
+//   original 1.5U models. Wider caps grow along X, stem stays centered.
+base_w = size_type == "choc" ? 17.5 : 18.0;
+pitch_x = size_type == "choc" ? 18.0 : 19.05;
+cap_w = base_w + (key_units - 1) * pitch_x;
 cap_d = size_type == "choc" ? 16.5 : 18.0;
+
+// The dish is stretched horizontally with the cap so wide caps keep
+// the same scoop character (matches the original 1.5U models).
+dish_sx = cap_w / base_w;
 
 // Cavity depth (bottom rim -> ceiling), from the originals:
 //   choc stem: 2.05 mm, mx stem: 2.0 mm
@@ -164,11 +174,13 @@ module cap_body() {
     }
 }
 
-// Spherical dish cutter: lowest point sits `dish_depth` below the crown.
+// Spherical dish cutter: lowest point sits `dish_depth` below the
+// crown. Stretched along X for wide (1.5U+) caps.
 module dish_sphere() {
     top_frame()
-        translate([0, 0, dish_radius - dish_depth])
-            sphere(r = dish_radius);
+        scale([dish_sx, 1, 1])
+            translate([0, 0, dish_radius - dish_depth])
+                sphere(r = dish_radius);
 }
 
 // Saddle cutter: cylinder along the left-right axis, giving a

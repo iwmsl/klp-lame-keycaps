@@ -19,6 +19,7 @@ declare -A VARIANTS=(
   [Saddle]='-D variant="saddle"'
   [Saddle_Homing]='-D variant="saddle" -D homing="bar"'
   [Saddle_Tilted]='-D variant="saddle_tilted"'
+  [1.5U_Normal]='-D variant="normal" -D key_units=1.5'
 )
 
 for stem in choc mx; do
