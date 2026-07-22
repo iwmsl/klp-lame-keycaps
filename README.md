@@ -11,9 +11,20 @@ Sculpted and curved keycaps for Kailh Choc and MX switches. Here is a project st
 | **Assets**     | Various images and actual photos of keycaps                                                   |
 | **Blender**    | Blender files for preview image render                                                        |
 | **Fusion 360** | Source files for [Autodesk Fusion 360](https://www.autodesk.com/products/fusion-360/overview) |
+| **OpenSCAD**   | Parametric [Angular](./OpenSCAD/README.md) remix — flat-sided, lower-profile variant          |
 | **Production** | Combined STL 3D models suitable for 3D-Printing services (like [JLC3DP](https://jlc3dp.com))  |
 | **STEP**       | 3D models in STEP format for any CAD or Slicer software                                       |
 | **STL**        | 3D models in STL format for any CAD or Slicer software                                        |
+
+## Angular remix (OpenSCAD)
+
+![](./Assets/KLP-Lame-Angular-Preview.png)
+
+There is also an angular, slightly lower-profile remix of the Lamé profile
+with flat trapezoid sides, keeping the signature sloped & dished top. It is
+fully parametric (OpenSCAD) and FDM-friendly (e.g. Bambu Lab A1 mini).
+See [OpenSCAD/README.md](./OpenSCAD/README.md) for parameters, prebuilt STLs
+and printing notes.
 
 > `STEP` and `STL` folders contain all combinations of Choc/MX Stem + Choc/MX Size.
 >
