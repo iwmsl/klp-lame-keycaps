@@ -42,6 +42,22 @@ original STLs, so switch fit is identical to the originals.
 ビルド済み STL は `STL/` 以下(`build.sh` で再生成できます)。
 ホーミングは `homing = "dots"` でオリジナル風の3点バンプにも変更可能です。
 
+## Corne v4 Mini 印刷セット / Print set
+
+[c4mtb](https://github.com/iwmsl/c4mtb)(Corne v4 Mini 相当)向けの
+**両手36キー一式**を、Bambu Lab A1 mini(180×180mm)にそのまま並べた
+プレートを用意しています(`MX Stem + Choc Size`)。詳細は
+[Plates/README.md](./Plates/README.md)。
+
+| ファイル | 向き | 特徴 |
+| :--- | :--- | :--- |
+| `Plates/Plate_A1mini_SideDown.stl` | 側面を下(横倒し) | 天面に積層痕が出ず手触り良好。サポート要(推奨) |
+| `Plates/Plate_A1mini_BottomDown.stl` | 底面を下(上向き) | 配置が単純。天面は積層痕が出る。サポート＋ブリム推奨 |
+
+内訳: Normal Tilted×20 / Normal×8 / Normal Homing×2 / Thumb×6 = 36。
+
+![](../Assets/KLP-Lame-Angular-Plate-SideDown.png)
+
 ## 使い方 / Usage
 
 ### OpenSCAD GUI(カスタマイザ)

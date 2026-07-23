@@ -42,6 +42,9 @@ for stem in choc mx; do
   done
 done
 
+echo "==> A1 mini print plates"
+python3 make_plate.py Plates
+
 echo "==> preview image"
 RUN=""
 if [ -z "${DISPLAY:-}" ] && command -v xvfb-run >/dev/null; then RUN="xvfb-run -a"; fi
