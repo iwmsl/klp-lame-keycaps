@@ -25,7 +25,8 @@ BOM = [
     ("Normal_Tilted", 20),      # top + bottom rows
     ("Normal", 8),              # home row
     ("Normal_Homing", 2),       # index home keys
-    ("1.5U_Thumb_Slope", 6),    # thumbs (1.5U each, slope pattern)
+    ("Thumb", 4),               # thumbs: two 1U per hand
+    ("1.5U_Thumb_Slope", 2),    # thumbs: one 1.5U per hand
 ]
 
 

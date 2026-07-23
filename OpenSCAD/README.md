@@ -54,7 +54,7 @@ original STLs, so switch fit is identical to the originals.
 | `Plates/Plate_A1mini_SideDown.stl` | 側面を下(横倒し) | 天面に積層痕が出ず手触り良好。サポート要(推奨) |
 | `Plates/Plate_A1mini_BottomDown.stl` | 底面を下(上向き) | 配置が単純。天面は積層痕が出る。サポート＋ブリム推奨 |
 
-内訳: Normal Tilted×20 / Normal×8 / Normal Homing×2 / 1.5U Thumb Slope×6 = 36。
+内訳: Normal Tilted×20 / Normal×8 / Normal Homing×2 / Thumb(1U)×4 / 1.5U Thumb Slope×2 = 36。
 
 ![](../Assets/KLP-Lame-Angular-Plate-SideDown.png)
 

@@ -12,7 +12,8 @@ Caps used: **MX Stem + Choc Size**.
 | Normal Tilted (top & bottom rows) | 20 |
 | Normal (home row) | 8 |
 | Normal Homing (index home keys) | 2 |
-| 1.5U Thumb Slope (thumbs, 1.5U each) | 6 |
+| Thumb (1U, two per hand) | 4 |
+| 1.5U Thumb Slope (one per hand) | 2 |
 | **Total** | **36** |
 
 ## Two print orientations
@@ -25,7 +26,7 @@ Caps used: **MX Stem + Choc Size**.
 Both plates fit the bed:
 
 - SideDown : ~159 × 84 mm, 16.4 mm tall (10 cols)
-- BottomDown: ~161 × 112 mm, 8.7 mm tall (8 cols)
+- BottomDown: ~161 × 103 mm, 8.7 mm tall (8 cols)
 
 ## Slicing (Bambu Studio, A1 mini)
 
