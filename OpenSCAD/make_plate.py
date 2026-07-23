@@ -22,10 +22,10 @@ PREFIX = "MX_Stem_Choc_Size_Angular_"
 
 # Corne v4 Mini, both hands (36 caps).
 BOM = [
-    ("Normal_Tilted", 20),   # top + bottom rows
-    ("Normal", 8),           # home row
-    ("Normal_Homing", 2),    # index home keys
-    ("Thumb", 6),            # thumbs
+    ("Normal_Tilted", 20),      # top + bottom rows
+    ("Normal", 8),              # home row
+    ("Normal_Homing", 2),       # index home keys
+    ("1.5U_Thumb_Slope", 6),    # thumbs (1.5U each, slope pattern)
 ]
 
 
@@ -106,23 +106,26 @@ def cap_cells(side):
 
 
 def build(side, out):
-    caps = cap_cells(side)
+    # Group by footprint so rows stay compact (biggest caps don't
+    # inflate every row). Widest cell sets the column pitch.
+    caps = sorted(cap_cells(side), key=lambda c: c[2])
     cw = max(c[1] for c in caps) + GAP
-    ch = max(c[2] for c in caps) + GAP
     usable = BED - 2 * MARGIN
     cols = max(1, int(usable // cw))
-    rows = math.ceil(len(caps) / cols)
-    plate = []
+    rows = [caps[i:i + cols] for i in range(0, len(caps), cols)]
     W = cols * cw
-    H = rows * ch
-    for i, (tris, _, _) in enumerate(caps):
-        col, row = i % cols, i // cols
-        x = -W / 2 + cw / 2 + col * cw
-        y = H / 2 - ch / 2 - row * ch
-        plate += translate(tris, x, y, 0)
+    H = sum(max(c[2] for c in r) + GAP for r in rows)
+    plate = []
+    y = H / 2
+    for r in rows:
+        rh = max(c[2] for c in r) + GAP
+        for col, (tris, _, _) in enumerate(r):
+            x = -W / 2 + cw / 2 + col * cw
+            plate += translate(tris, x, y - rh / 2, 0)
+        y -= rh
     write_stl(out, plate)
     (mnx, mny, mnz), (mxx, mxy, mxz) = bounds(plate)
-    print(f"{os.path.basename(out)}: {len(caps)} caps, grid {cols}x{rows}, "
+    print(f"{os.path.basename(out)}: {len(caps)} caps, {cols} cols x {len(rows)} rows, "
           f"bbox {mxx-mnx:.1f} x {mxy-mny:.1f} x {mxz-mnz:.1f} mm "
           f"({'FITS' if max(mxx-mnx, mxy-mny) <= BED else 'TOO BIG'})")
 
