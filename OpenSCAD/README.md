@@ -51,7 +51,7 @@ original STLs, so switch fit is identical to the originals.
 
 | ファイル | 向き | 特徴 |
 | :--- | :--- | :--- |
-| `Plates/Plate_A1mini_Test_OneEach_MinContact.stl` | 各モデルで接地可能な最小の側面を下 | 9種を各1個。約56.6×55.5mm。まず試す用。8mmブリム推奨 |
+| `Plates/Plate_A1mini_Test_OneEach_MinContact.stl` | 各モデルの最小側面を下。Thumb系のみ上下反転して後面を下 | 9種を各1個。約56.6×55.5mm。まず試す用。8mmブリム推奨 |
 | `Plates/Plate_A1mini_SideDown.stl` | 側面を下(横倒し) | 天面に積層痕が出ず手触り良好。サポート要(推奨) |
 | `Plates/Plate_A1mini_BottomDown.stl` | 底面を下(上向き) | 配置が単純。天面は積層痕が出る。サポート＋ブリム推奨 |
 
@@ -103,7 +103,8 @@ openscad -o cap.stl -D 'stem_type="choc"' -D 'variant="saddle"' klp-lame-angular
 側面がフラットなので **横倒し(左右どちらかの側面を下)** が印刷しやすく、
 天面の積層痕も目立ちにくいです。オリジナル同様の 45° 傾けでも構いません。
 試作プレートでは左右固定ではなく、4つの外側面をモデルごとに解析し、
-実際に接地できる平面のうち面積が最小の面を下にしています。
+実際に接地できる平面のうち面積が最小の面を下にしています。ただし
+Thumb と 1.5U Thumb Slope は安定性を優先し、上下を反転して反対の後面を下にしています。
 
 - ノズル: 0.4 mm / レイヤー: 0.08–0.12 mm
 - 壁: 4 以上、インフィル: 100%(小さい部品なのでほぼ変わりません)

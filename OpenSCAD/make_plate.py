@@ -5,7 +5,8 @@ Reads the built angular STLs and writes:
   - <out>_BottomDown.stl : caps upright (bottom/stem toward the bed)
   - <out>_SideDown.stl   : caps laid on a side wall (best top surface)
   - <out>_Test_OneEach_MinContact.stl : one of every variant, with
-    each cap resting on its smallest usable outer side face
+    each cap resting on its smallest usable outer side face, except
+    thumb variants which use the opposite rear face for stability
 
 Both are laid out to fit the A1 mini's 180 x 180 mm bed. Import a plate
 into Bambu Studio, add supports (tree, for the overhangs), and slice.
@@ -47,6 +48,14 @@ TEST_VARIANTS = [
     "1.5U_Normal",
     "1.5U_Thumb_Slope",
 ]
+
+# The smallest face on the two thumb profiles is the low front wall,
+# but it is too narrow for a stable first print. Flip them front-to-rear
+# and use the larger rear wall instead.
+TEST_SIDE_OVERRIDES = {
+    "Thumb": "rear",
+    "1.5U_Thumb_Slope": "rear",
+}
 
 SIDE_PRIORITY = {"left": 0, "right": 1, "front": 2, "rear": 3}
 MIN_MAIN_SIDE_AREA = 10.0
@@ -213,8 +222,12 @@ def bed_contact_area(tris):
     )
 
 
-def prep_min_contact(tris):
-    """Put the smallest main outer side face on the build plate."""
+def prep_min_contact(tris, preferred_side=None):
+    """Put a usable outer side face on the build plate.
+
+    The smallest face is selected by default. ``preferred_side`` can
+    override it when print stability is more important.
+    """
     valid = []
     for face in main_side_faces(tris):
         rotated = rotate_matrix(tris, rotation_to_down(face["normal"]))
@@ -226,6 +239,13 @@ def prep_min_contact(tris):
                           face, rotated))
     if not valid:
         raise RuntimeError("No usable outer side face found")
+
+    if preferred_side is not None:
+        valid = [item for item in valid
+                 if item[2]["side"] == preferred_side]
+        if not valid:
+            raise RuntimeError(
+                f"Requested side is not usable: {preferred_side}")
 
     contact, _, face, rotated = min(valid, key=lambda item: (item[0], item[1]))
     (mnx, mny, mnz), (mxx, mxy, _) = bounds(rotated)
@@ -289,7 +309,8 @@ def build_test(out):
     caps = []
     for name in TEST_VARIANTS:
         tris = load(os.path.join(STL_DIR, PREFIX + name + ".stl"))
-        oriented, info = prep_min_contact(tris)
+        oriented, info = prep_min_contact(
+            tris, preferred_side=TEST_SIDE_OVERRIDES.get(name))
         (mnx, mny, _), (mxx, mxy, _) = bounds(oriented)
         caps.append({
             "name": name,
