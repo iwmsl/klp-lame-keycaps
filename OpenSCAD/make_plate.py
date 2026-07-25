@@ -57,6 +57,11 @@ TEST_SIDE_OVERRIDES = {
     "1.5U_Thumb_Slope": "rear",
 }
 
+# In-plane direction of the original +Z stem axis after a cap has been
+# laid down. 180 degrees matches the Normal key orientation. Rotating
+# around the build-plate Z axis does not change the selected contact face.
+TEST_STEM_ANGLE_DEG = 180.0
+
 SIDE_PRIORITY = {"left": 0, "right": 1, "front": 2, "rear": 3}
 MIN_MAIN_SIDE_AREA = 10.0
 BED_CONTACT_TOL = 0.03
@@ -86,6 +91,13 @@ def rot_y(t, deg):
     a = math.radians(deg)
     c, s = math.cos(a), math.sin(a)
     return [[(x * c + z * s, y, -x * s + z * c) for (x, y, z) in tri] for tri in t]
+
+
+def rot_z(t, deg):
+    a = math.radians(deg)
+    c, s = math.cos(a), math.sin(a)
+    return [[(x * c - y * s, x * s + y * c, z)
+             for (x, y, z) in tri] for tri in t]
 
 
 def bounds(t):
@@ -230,13 +242,14 @@ def prep_min_contact(tris, preferred_side=None):
     """
     valid = []
     for face in main_side_faces(tris):
-        rotated = rotate_matrix(tris, rotation_to_down(face["normal"]))
+        matrix = rotation_to_down(face["normal"])
+        rotated = rotate_matrix(tris, matrix)
         contact = bed_contact_area(rotated)
         # The chosen planar patch must actually be the supporting face,
         # not a face hidden behind a protruding stem or rounded edge.
         if contact >= max(5.0, face["area"] * 0.65):
             valid.append((contact, SIDE_PRIORITY[face["side"]],
-                          face, rotated))
+                          face, rotated, matrix))
     if not valid:
         raise RuntimeError("No usable outer side face found")
 
@@ -247,7 +260,16 @@ def prep_min_contact(tris, preferred_side=None):
             raise RuntimeError(
                 f"Requested side is not usable: {preferred_side}")
 
-    contact, _, face, rotated = min(valid, key=lambda item: (item[0], item[1]))
+    contact, _, face, rotated, matrix = min(
+        valid, key=lambda item: (item[0], item[1]))
+
+    # Align every projected stem axis with the Normal key. This is only
+    # an in-plane rotation, so the chosen supporting face and its area
+    # stay exactly the same.
+    stem_angle = math.degrees(math.atan2(matrix[1][2], matrix[0][2]))
+    in_plane_rotation = TEST_STEM_ANGLE_DEG - stem_angle
+    rotated = rot_z(rotated, in_plane_rotation)
+
     (mnx, mny, mnz), (mxx, mxy, _) = bounds(rotated)
     centered = translate(rotated, -(mnx + mxx) / 2,
                          -(mny + mxy) / 2, -mnz)
@@ -255,6 +277,7 @@ def prep_min_contact(tris, preferred_side=None):
         "side": face["side"],
         "face_area": face["area"],
         "contact_area": contact,
+        "stem_angle": TEST_STEM_ANGLE_DEG,
     }
 
 

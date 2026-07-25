@@ -15,8 +15,11 @@ The two Thumb variants are deliberately flipped to the opposite rear
 face because their smallest front wall is too narrow for a stable print.
 Inner cavity walls and tiny rounded/chamfer faces are excluded, so the
 choice is a real supporting face rather than an unstable edge or point.
+After the contact face is chosen, every cap is rotated only within the
+build-plate plane so all stem axes point in the same direction as Normal.
+This final rotation does not change contact area or stability.
 
-- Size: approximately **56.6 × 55.5 × 23.2 mm**
+- Size: approximately **45.0 × 57.5 × 23.2 mm**
 - Actual contact area per cap: approximately **42.6–59.6 mm²**
 - Layout, viewed from above:
 
