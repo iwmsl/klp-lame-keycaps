@@ -45,6 +45,11 @@ as separately selectable objects and embeds a conservative A1 mini /
 0.4 mm nozzle / PLA process configuration. The matching importable
 process preset is `KLP_Lame_A1mini_PLA_Quality_Process.json`.
 
+The four 1U variants (Normal, Normal Homing, Normal Tilted and Thumb)
+are placed with the touch surface toward the build plate and the stem
+opening upward. The two 1.5U variants keep their minimum-contact side
+orientation.
+
 The embedded profile uses 0.12 mm layers, slower first-layer and wall
 speeds, an 8 mm outer brim, and dense Normal/Snug support interfaces. It
 is intended to diagnose and improve the rough support-facing surfaces
