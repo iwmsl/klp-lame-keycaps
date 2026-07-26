@@ -38,6 +38,21 @@ This orientation still keeps contact marks small while giving both thumb
 profiles a more secure base. Use tree supports and an **8 mm brim** for
 the first print.
 
+## Quality-tuned Bambu project — PLA
+
+`KLP_Lame_6Cap_A1mini_PLA_Quality.3mf` packages the same six trial caps
+as separately selectable objects and embeds a conservative A1 mini /
+0.4 mm nozzle / PLA process configuration. The matching importable
+process preset is `KLP_Lame_A1mini_PLA_Quality_Process.json`.
+
+The embedded profile uses 0.12 mm layers, slower first-layer and wall
+speeds, an 8 mm outer brim, and dense Normal/Snug support interfaces. It
+is intended to diagnose and improve the rough support-facing surfaces
+near the build plate. This profile prioritizes underside quality rather
+than minimum support material. For a support-minimized print, disable
+automatic supports and paint Tree supports only beneath the stem boss
+and the first floating edges.
+
 ## Full 36-key Corne set
 
 | Bill of materials | Qty |
@@ -87,3 +102,13 @@ Edit the `BOM` list in `make_plate.py` to change counts (e.g. if your
 thumb layout uses the 1.5U `Thumb_Slope`). Edit `TEST_VARIANTS` to
 change the trial set; its minimum-contact orientation is recalculated
 from each STL automatically.
+
+Regenerate the quality-tuned 3MF and its standalone preset from the
+repository root:
+
+```sh
+python3 OpenSCAD/make_quality_3mf.py \
+  --repo-root . \
+  --output OpenSCAD/Plates/KLP_Lame_6Cap_A1mini_PLA_Quality.3mf \
+  --preset-output OpenSCAD/Plates/KLP_Lame_A1mini_PLA_Quality_Process.json
+```
