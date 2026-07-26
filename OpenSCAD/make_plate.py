@@ -34,6 +34,20 @@ BOM = [
     ("1.5U_Normal", 2),         # thumbs: one 1.5U per hand
 ]
 
+# One hand of a Corne v4 Mini (3 x 5 + 3 = 18 caps). The caps are
+# left-right symmetric, so the two hands use the same parts; only the
+# print orientation differs on the Corne36_LeftRight plate.
+HAND_BOM = [
+    ("Normal_Tilted", 10),      # top row 5 + bottom row 5
+    ("Normal", 6),              # home row 4 + 1U thumbs 2
+    ("Normal_Homing", 1),       # index home key
+    ("1.5U_Normal", 1),         # 1.5U thumb
+]
+
+# Extra spacing between the left-hand and right-hand blocks so the two
+# orientations stay easy to tell apart on the plate.
+HAND_GAP = 10.0
+
 # Every variant, one each. Order is the documented 2 x 2 layout, read
 # left-to-right and top-to-bottom.
 TEST_VARIANTS = [
@@ -105,14 +119,21 @@ def translate(t, dx, dy, dz):
     return [[(x + dx, y + dy, z + dz) for (x, y, z) in tri] for tri in t]
 
 
-def prep(tris, side):
-    """Orient a single cap: optional side tip, then drop onto z=0 and
-    center its footprint on the origin."""
-    if side:
-        tris = rot_y(tris, SIDE_ROT_Y)
+def prep_rot(tris, deg):
+    """Tip a cap `deg` about Y, then drop it onto z=0 and centre its
+    footprint on the origin. +SIDE_ROT_Y seats the right side wall on
+    the bed, -SIDE_ROT_Y the left one."""
+    if deg:
+        tris = rot_y(tris, deg)
     (mnx, mny, mnz), (mxx, mxy, mxz) = bounds(tris)
     cx, cy = (mnx + mxx) / 2, (mny + mxy) / 2
     return translate(tris, -cx, -cy, -mnz)
+
+
+def prep(tris, side):
+    """Orient a single cap: optional side tip, then drop onto z=0 and
+    center its footprint on the origin."""
+    return prep_rot(tris, SIDE_ROT_Y if side else 0)
 
 
 def tri_normal(a, b, c):
@@ -321,6 +342,56 @@ def build(side, out):
           f"({'FITS' if max(mxx-mnx, mxy-mny) <= BED else 'TOO BIG'})")
 
 
+def hand_cells(rot_deg):
+    """One hand's worth of caps, each tipped onto the given side wall."""
+    caps = []
+    for name, count in HAND_BOM:
+        tris = load(os.path.join(STL_DIR, PREFIX + name + ".stl"))
+        p = prep_rot(tris, rot_deg)
+        (mnx, mny, _), (mxx, mxy, _) = bounds(p)
+        caps += [(p, mxx - mnx, mxy - mny)] * count
+    return caps
+
+
+def build_hands(out):
+    """Full 36-cap Corne set in one go, with the left hand's caps lying
+    on their left side wall and the right hand's on their right side
+    wall. The rear block is the left hand, the front block the right."""
+    groups = [
+        ("left", sorted(hand_cells(-SIDE_ROT_Y), key=lambda c: c[2])),
+        ("right", sorted(hand_cells(+SIDE_ROT_Y), key=lambda c: c[2])),
+    ]
+    cw = max(c[1] for _, g in groups for c in g) + GAP
+    usable = BED - 2 * MARGIN
+    cols = max(1, int(usable // cw))
+    row_sets = [[g[i:i + cols] for i in range(0, len(g), cols)]
+                for _, g in groups]
+
+    W = cols * cw
+    H = sum(max(c[2] for c in r) + GAP for rs in row_sets for r in rs) \
+        + HAND_GAP * (len(row_sets) - 1)
+
+    plate, y = [], H / 2
+    for gi, rs in enumerate(row_sets):
+        if gi:
+            y -= HAND_GAP
+        for r in rs:
+            rh = max(c[2] for c in r) + GAP
+            for col, (tris, _, _) in enumerate(r):
+                x = -W / 2 + cw / 2 + col * cw
+                plate += translate(tris, x, y - rh / 2, 0)
+            y -= rh
+
+    write_stl(out, plate)
+    (mnx, mny, mnz), (mxx, mxy, mxz) = bounds(plate)
+    total = sum(len(g) for _, g in groups)
+    print(f"{os.path.basename(out)}: {total} caps "
+          f"({len(groups[0][1])} left-side-down + {len(groups[1][1])} "
+          f"right-side-down), {cols} cols, bbox "
+          f"{mxx-mnx:.1f} x {mxy-mny:.1f} x {mxz-mnz:.1f} mm "
+          f"({'FITS' if max(mxx-mnx, mxy-mny) <= BED else 'TOO BIG'})")
+
+
 def build_test(out):
     """Build a compact trial plate from TEST_VARIANTS."""
     caps = []
@@ -373,9 +444,12 @@ def build_test(out):
 if __name__ == "__main__":
     out_dir = sys.argv[1] if len(sys.argv) > 1 else "."
     mode = sys.argv[2] if len(sys.argv) > 2 else "all"
-    if mode not in {"all", "full", "test"}:
-        raise SystemExit("mode must be one of: all, full, test")
+    if mode not in {"all", "full", "test", "hands"}:
+        raise SystemExit("mode must be one of: all, full, test, hands")
     os.makedirs(out_dir, exist_ok=True)
+    if mode in {"all", "hands"}:
+        build_hands(os.path.join(
+            out_dir, "Plate_A1mini_Corne36_LeftRight.stl"))
     if mode in {"all", "full"}:
         build(False, os.path.join(out_dir, "Plate_A1mini_BottomDown.stl"))
         build(True, os.path.join(out_dir, "Plate_A1mini_SideDown.stl"))

@@ -1,8 +1,8 @@
 # Print plates — KLP Lamé Angular (Bambu Lab A1 mini)
 
 Ready-to-slice plates for the angular remix, pre-arranged to fit the
-A1 mini's 180 × 180 mm bed. Start with the four-cap trial plate before
-committing to a full 36-key Corne v4 Mini set.
+A1 mini's 180 × 180 mm bed. Start with the four-cap trial plate, then
+print the whole set with `Plate_A1mini_Corne36_LeftRight.stl`.
 
 Caps used: **MX Stem + MX Size** (18 × 18 mm footprint, chiclet
 sidewalls, for a 19 mm pitch).
@@ -52,6 +52,27 @@ than minimum support material. For a support-minimized print, disable
 automatic supports and paint Tree supports only beneath the stem boss
 and the first floating edges.
 
+## Corne set, both hands in one print — `Plate_A1mini_Corne36_LeftRight.stl`
+
+The whole 36-cap set on a single plate, split into two blocks by print
+orientation:
+
+| Block | Hand | Orientation |
+| :---- | :--- | :---------- |
+| Rear (+Y) | Left | laid on the cap's **left** side wall |
+| Front (−Y) | Right | laid on the cap's **right** side wall |
+
+The caps themselves are left-right symmetric, so both hands use the
+same parts — only the orientation differs. Printing each hand on its
+own side means the support scars and any elephant foot end up on
+mirrored walls, so the assembled keyboard stays symmetric.
+
+- Size: approximately **157.2 × 91.0 × 26.8 mm** — fits the bed
+- 18 caps per block: 10 × Normal Tilted, 6 × Normal, 1 × Normal
+  Homing, 1 × 1.5U Normal
+- Each cap stands on a side wall (~48–81 mm² of contact) and is up to
+  26.8 mm tall, so use tree supports and an **8 mm brim**
+
 ## Full 36-key Corne set
 
 | Bill of materials | Qty |
@@ -90,14 +111,16 @@ Both plates fit the bed:
 Plates are generated from the built STLs:
 
 ```sh
-./build.sh                         # build caps and all three plates
-python3 make_plate.py Plates test  # trial plate only
-python3 make_plate.py Plates full  # two 36-key plates only
-python3 make_plate.py Plates       # all three plates
+./build.sh                          # build caps and every plate
+python3 make_plate.py Plates hands  # both-hands left/right plate only
+python3 make_plate.py Plates test   # trial plate only
+python3 make_plate.py Plates full   # the two single-orientation plates
+python3 make_plate.py Plates        # all of them
 ```
 
-Edit the `BOM` list in `make_plate.py` to change counts (e.g. if your
-layout differs). Edit `TEST_VARIANTS` to
+Edit `BOM` (single-orientation plates) or `HAND_BOM` (per hand, used
+by the left/right plate) in `make_plate.py` to change counts. Edit
+`TEST_VARIANTS` to
 change the trial set; its minimum-contact orientation is recalculated
 from each STL automatically.
 
