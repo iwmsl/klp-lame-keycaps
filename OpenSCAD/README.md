@@ -51,12 +51,13 @@ original STLs, so switch fit is identical to the originals.
 
 | ファイル | 向き | 特徴 |
 | :--- | :--- | :--- |
-| `Plates/Plate_A1mini_Test_OneEach_MinContact.stl` | 各モデルの最小側面を下。Thumb系のみ上下反転して後面を下 | 9種を各1個。約45.0×57.5mm。まず試す用。8mmブリム推奨 |
+| `Plates/Plate_A1mini_Test_OneEach_MinContact.stl` | 各モデルの最小側面を下。Thumb系のみ上下反転して後面を下 | Saddle系を除く6種を各1個。約45.0×37.0mm。8mmブリム推奨 |
 | `Plates/Plate_A1mini_SideDown.stl` | 側面を下(横倒し) | 天面に積層痕が出ず手触り良好。サポート要(推奨) |
 | `Plates/Plate_A1mini_BottomDown.stl` | 底面を下(上向き) | 配置が単純。天面は積層痕が出る。サポート＋ブリム推奨 |
 
-試作版の内訳: Normal / Normal Homing / Normal Tilted / Thumb / Saddle /
-Saddle Homing / Saddle Tilted / 1.5U Normal / 1.5U Thumb Slope を各1個。
+試作版の内訳: Normal / Normal Homing / Normal Tilted / Thumb /
+1.5U Normal / 1.5U Thumb Slope を各1個。Saddle系3種は単品STLには残し、
+試作プレートからのみ除外しています。
 
 36キー版の内訳: Normal Tilted×20 / Normal×8 / Normal Homing×2 /
 Thumb(1U)×4 / 1.5U Thumb Slope×2 = 36。
@@ -105,7 +106,7 @@ openscad -o cap.stl -D 'stem_type="choc"' -D 'variant="saddle"' klp-lame-angular
 試作プレートでは左右固定ではなく、4つの外側面をモデルごとに解析し、
 実際に接地できる平面のうち面積が最小の面を下にしています。ただし
 Thumb と 1.5U Thumb Slope は安定性を優先し、上下を反転して反対の後面を下にしています。
-接地面を決めた後はプレート面内だけで回転し、全9種のステム方向を
+接地面を決めた後はプレート面内だけで回転し、全6種のステム方向を
 Normal と同じ向きに揃えています。この回転で接地面積は変わりません。
 
 - ノズル: 0.4 mm / レイヤー: 0.08–0.12 mm

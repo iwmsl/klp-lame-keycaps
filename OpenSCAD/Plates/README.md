@@ -1,15 +1,17 @@
 # Print plates — KLP Lamé Angular (Bambu Lab A1 mini)
 
 Ready-to-slice plates for the angular remix, pre-arranged to fit the
-A1 mini's 180 × 180 mm bed. Start with the nine-cap trial plate before
+A1 mini's 180 × 180 mm bed. Start with the six-cap trial plate before
 committing to a full 36-key Corne v4 Mini set.
 
 Caps used: **MX Stem + Choc Size**.
 
-## Trial plate — one of each variant
+## Trial plate — six selected variants
 
-`Plate_A1mini_Test_OneEach_MinContact.stl` contains one of every variant
-currently built by `build.sh` (nine caps total). Each mesh is inspected
+`Plate_A1mini_Test_OneEach_MinContact.stl` contains one of each selected
+first-print variant (six caps total). Saddle, Saddle Homing and Saddle
+Tilted remain available as individual STLs but are omitted from this
+trial plate. Each included mesh is inspected
 individually and placed on the **smallest usable flat outer side face**.
 The two Thumb variants are deliberately flipped to the opposite rear
 face because their smallest front wall is too narrow for a stable print.
@@ -19,19 +21,18 @@ After the contact face is chosen, every cap is rotated only within the
 build-plate plane so all stem axes point in the same direction as Normal.
 This final rotation does not change contact area or stability.
 
-- Size: approximately **45.0 × 57.5 × 23.2 mm**
+- Size: approximately **45.0 × 37.0 × 23.2 mm**
 - Actual contact area per cap: approximately **42.6–59.6 mm²**
 - Layout, viewed from above:
 
 | Row | Left | Centre | Right |
 | :-- | :--- | :----- | :---- |
 | 1 | Normal | Normal Homing | Normal Tilted |
-| 2 | Thumb | Saddle | Saddle Homing |
-| 3 | Saddle Tilted | 1.5U Normal | 1.5U Thumb Slope |
+| 2 | Thumb | 1.5U Normal | 1.5U Thumb Slope |
 
-The selected face is left for Normal, Normal Homing, Normal Tilted,
-Saddle, Saddle Homing, Saddle Tilted and 1.5U Normal. Thumb and 1.5U
-Thumb Slope use the opposite rear face for better stability.
+The selected face is left for Normal, Normal Homing, Normal Tilted and
+1.5U Normal. Thumb and 1.5U Thumb Slope use the opposite rear face for
+better stability.
 
 This orientation still keeps contact marks small while giving both thumb
 profiles a more secure base. Use tree supports and an **8 mm brim** for
