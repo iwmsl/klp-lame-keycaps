@@ -19,44 +19,36 @@ import sys
 BED = 180.0
 MARGIN = 6.0
 GAP = 3.0
-# Lay the (drafted) side wall flat: the wall leans ~29 deg from
-# vertical, so tip the cap 90+29 deg about Y to seat the wall.
-SIDE_ROT_Y = 119.0
+# Lay the (drafted) side wall flat. The chiclet wall leans ~12.8 deg
+# from vertical, so tip the cap 90+12.8 deg about Y to seat the wall.
+SIDE_ROT_Y = 102.8
 
-STL_DIR = os.path.join(os.path.dirname(__file__), "STL", "MX Stem + Choc Size")
-PREFIX = "MX_Stem_Choc_Size_Angular_"
+STL_DIR = os.path.join(os.path.dirname(__file__), "STL", "MX Stem + MX Size")
+PREFIX = "MX_Stem_MX_Size_Angular_"
 
 # Corne v4 Mini, both hands (36 caps).
 BOM = [
     ("Normal_Tilted", 20),      # top + bottom rows
-    ("Normal", 8),              # home row
+    ("Normal", 12),             # home row (8) + 1U thumbs (4)
     ("Normal_Homing", 2),       # index home keys
-    ("Thumb", 4),               # thumbs: two 1U per hand
-    ("1.5U_Thumb_Slope", 2),    # thumbs: one 1.5U per hand
+    ("1.5U_Normal", 2),         # thumbs: one 1.5U per hand
 ]
 
-# Selected first-print variants. Saddle profiles remain available as
-# individual STLs but are intentionally omitted from this trial plate.
-# Order is the documented 3 x 2 layout, read left-to-right and
-# top-to-bottom.
+# Every variant, one each. Order is the documented 2 x 2 layout, read
+# left-to-right and top-to-bottom.
 TEST_VARIANTS = [
     "Normal",
     "Normal_Homing",
     "Normal_Tilted",
-    "Thumb",
     "1.5U_Normal",
-    "1.5U_Thumb_Slope",
 ]
 
-# Normal, Normal Tilted and Thumb use the rear outer side face (the upper
-# side in top view). Normal Homing uses its automatically selected side
-# to reduce support material. The 1.5U thumb profile uses its larger rear
-# wall for stability; 1.5U Normal keeps its selected minimum face.
+# Normal and Normal Tilted use the rear outer side face (the upper side
+# in top view). Normal Homing and 1.5U Normal keep their automatically
+# selected side face, which needs less support material.
 TEST_SIDE_OVERRIDES = {
     "Normal": "rear",
     "Normal_Tilted": "rear",
-    "Thumb": "rear",
-    "1.5U_Thumb_Slope": "rear",
 }
 
 # In-plane direction of the original +Z stem axis after a cap has been

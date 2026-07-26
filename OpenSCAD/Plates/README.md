@@ -1,53 +1,47 @@
 # Print plates — KLP Lamé Angular (Bambu Lab A1 mini)
 
 Ready-to-slice plates for the angular remix, pre-arranged to fit the
-A1 mini's 180 × 180 mm bed. Start with the six-cap trial plate before
+A1 mini's 180 × 180 mm bed. Start with the four-cap trial plate before
 committing to a full 36-key Corne v4 Mini set.
 
-Caps used: **MX Stem + Choc Size**.
+Caps used: **MX Stem + MX Size** (18 × 18 mm footprint, chiclet
+sidewalls, for a 19 mm pitch).
 
-## Trial plate — six selected variants
+## Trial plate — all variants
 
-`Plate_A1mini_Test_OneEach_RearSideDown.stl` contains one of each selected
-first-print variant (six caps total). Saddle, Saddle Homing and Saddle
-Tilted remain available as individual STLs but are omitted from this
-trial plate. Normal, Normal Tilted and Thumb are placed on the **rear
-outer side face**—the upper side in the model's top view. Normal Homing
-uses its automatically selected side face to reduce support material.
-The 1.5U variants keep their selected stable side faces.
-Inner cavity walls and tiny rounded/chamfer faces are excluded, so the
-choice is a real supporting face rather than an unstable edge or point.
-After the contact face is chosen, every cap is rotated only within the
-build-plate plane so all stem axes point in the same direction as Normal.
-This final rotation does not change contact area or stability.
+`Plate_A1mini_Test_OneEach_RearSideDown.stl` contains one of every
+variant (four caps total). Normal and Normal Tilted are placed on the
+**rear outer side face**—the upper side in the model's top view. Normal
+Homing and 1.5U Normal use their automatically selected side face, which
+needs less support material. Inner cavity walls and tiny rounded/chamfer
+faces are excluded, so the choice is a real supporting face rather than
+an unstable edge or point. After the contact face is chosen, every cap is
+rotated only within the build-plate plane so all stem axes point in the
+same direction as Normal. This final rotation does not change contact
+area or stability.
 
-- Size: approximately **45.0 × 37.0 × 23.2 mm**
-- Actual contact area per cap: approximately **42.6–59.6 mm²**
+- Size: approximately **32.7 × 39.0 × 26.8 mm**
+- Actual contact area per cap: approximately **47.7–81.1 mm²**
 - Layout, viewed from above:
 
-| Row | Left | Centre | Right |
-| :-- | :--- | :----- | :---- |
-| 1 | Normal | Normal Homing | Normal Tilted |
-| 2 | Thumb | 1.5U Normal | 1.5U Thumb Slope |
+| Row | Left | Right |
+| :-- | :--- | :---- |
+| 1 | Normal | Normal Homing |
+| 2 | Normal Tilted | 1.5U Normal |
 
-The selected face is rear for Normal, Normal Tilted, Thumb and
-1.5U Thumb Slope. Normal Homing and 1.5U Normal use their left side face.
-
-This orientation still keeps contact marks small while giving both thumb
-profiles a more secure base. Use tree supports and an **8 mm brim** for
-the first print.
+Use tree supports and an **8 mm brim** for the first print.
 
 ## Quality-tuned Bambu project — PLA
 
-`KLP_Lame_6Cap_A1mini_PLA_Quality.3mf` packages the same six trial caps
+`KLP_Lame_4Cap_A1mini_PLA_Quality.3mf` packages the same four trial caps
 as separately selectable objects and embeds a conservative A1 mini /
 0.4 mm nozzle / PLA process configuration. The matching importable
 process preset is `KLP_Lame_A1mini_PLA_Quality_Process.json`.
 
-The four 1U variants (Normal, Normal Homing, Normal Tilted and Thumb)
-are placed with the **rear outer side face**—the upper side in the model's
+The three 1U variants (Normal, Normal Homing and Normal Tilted) are
+placed with the **rear outer side face**—the upper side in the model's
 top view—toward the build plate. This keeps them side-down rather than
-putting the touch surface on the bed. The two 1.5U variants keep their
+putting the touch surface on the bed. 1.5U Normal keeps its
 minimum-contact side orientation.
 
 The embedded profile uses 0.12 mm layers, slower first-layer and wall
@@ -63,10 +57,9 @@ and the first floating edges.
 | Bill of materials | Qty |
 | :---------------- | --: |
 | Normal Tilted (top & bottom rows) | 20 |
-| Normal (home row) | 8 |
+| Normal (home row 8 + 1U thumbs 4) | 12 |
 | Normal Homing (index home keys) | 2 |
-| Thumb (1U, two per hand) | 4 |
-| 1.5U Thumb Slope (one per hand) | 2 |
+| 1.5U Normal (one thumb per hand) | 2 |
 | **Total** | **36** |
 
 | File | Orientation | Notes |
@@ -76,8 +69,8 @@ and the first floating edges.
 
 Both plates fit the bed:
 
-- SideDown : ~159 × 84 mm, 16.4 mm tall (10 cols)
-- BottomDown: ~161 × 103 mm, 8.7 mm tall (8 cols)
+- SideDown : ~158 × 60 mm, 26.8 mm tall (12 cols)
+- BottomDown: ~150 × 165 mm, 8.5 mm tall (5 cols)
 
 ## Slicing (Bambu Studio, A1 mini)
 
@@ -104,7 +97,7 @@ python3 make_plate.py Plates       # all three plates
 ```
 
 Edit the `BOM` list in `make_plate.py` to change counts (e.g. if your
-thumb layout uses the 1.5U `Thumb_Slope`). Edit `TEST_VARIANTS` to
+layout differs). Edit `TEST_VARIANTS` to
 change the trial set; its minimum-contact orientation is recalculated
 from each STL automatically.
 
@@ -114,6 +107,6 @@ repository root:
 ```sh
 python3 OpenSCAD/make_quality_3mf.py \
   --repo-root . \
-  --output OpenSCAD/Plates/KLP_Lame_6Cap_A1mini_PLA_Quality.3mf \
+  --output OpenSCAD/Plates/KLP_Lame_4Cap_A1mini_PLA_Quality.3mf \
   --preset-output OpenSCAD/Plates/KLP_Lame_A1mini_PLA_Quality_Process.json
 ```

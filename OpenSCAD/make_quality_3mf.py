@@ -21,25 +21,20 @@ VARIANTS = [
     "Normal",
     "Normal_Homing",
     "Normal_Tilted",
-    "Thumb",
     "1.5U_Normal",
-    "1.5U_Thumb_Slope",
 ]
 
 REAR_SIDE_DOWN_VARIANTS = {
     "Normal",
     "Normal_Homing",
     "Normal_Tilted",
-    "Thumb",
 }
 
 DISPLAY_NAMES = {
     "Normal": "Normal",
     "Normal_Homing": "Normal Homing",
     "Normal_Tilted": "Normal Tilted",
-    "Thumb": "Thumb",
     "1.5U_Normal": "1.5U Normal",
-    "1.5U_Thumb_Slope": "1.5U Thumb Slope",
 }
 
 

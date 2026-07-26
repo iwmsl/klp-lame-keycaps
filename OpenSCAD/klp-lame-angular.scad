@@ -23,12 +23,11 @@ stem_type = "choc"; // [choc, mx]
 size_type = "choc"; // [choc, mx]
 // Key width in units (1.5U is stretched horizontally, stem centered)
 key_units = 1; // [1:0.25:2]
-// Key depth in units (stretched front-to-back, stem centered). Used
-// for the deep thumb variants.
+// Key depth in units (stretched front-to-back, stem centered)
 key_units_y = 1; // [1:0.25:2]
-// Top profile variant. thumb = 1U dome waterfall; thumb_slope spreads
-// that slope over the whole (deep) cap for wide/deep thumb keys.
-variant = "normal"; // [normal, tilted, thumb, thumb_slope, saddle, saddle_tilted]
+// Top profile variant. normal = dished flat cap; tilted = the same cap
+// tilted up toward the back for the rows above/below the home row.
+variant = "normal"; // [normal, tilted]
 // Homing feature on the touch surface
 homing = "none"; // [none, bar, dots]
 
@@ -38,7 +37,7 @@ homing = "none"; // [none, bar, dots]
 //   wide    : straight taper, classic sculpted look (biggest gap)
 //   chiclet : near-vertical walls, large top, LAK/laptop-like (tightest)
 //   skirt   : vertical skirt at the bottom, then taper above
-side_style = "wide"; // [wide, chiclet, skirt]
+side_style = "chiclet"; // [chiclet, wide, skirt]
 // Height of the crown (top edge of the cap) above the bottom rim
 crown_height = 5.0;
 // wide: how much each side face leans in from bottom to top (per side)
@@ -65,32 +64,13 @@ bottom_edge_round = 0.4;
 dish_depth = 1.15;
 // Radius of the spherical dish (smaller = deeper/rounder scoop)
 dish_radius = 28;
-// Tilt angle for tilted variants (matches original 15)
-tilt_angle = 15;
-// Crown height at the front footprint edge for tilted variants
-// (kept high enough that the low front edge keeps a printable roof)
-tilt_front_height = 4.0;
-// chiclet: the larger top face reaches further back, so the rear rises
-// more per degree of tilt — start lower to keep the cap low-profile
-chiclet_tilt_front = 3.0;
-// Saddle: front/back cylindrical valley depth at center, below crown
-saddle_depth = 1.5;
-// Saddle: radius of the front/back valley cylinder (axis left-right)
-saddle_radius = 20;
-// Thumb: radius of the convex waterfall (bigger = straighter ramp)
-thumb_dome_radius = 38;
-// Thumb: horizontal stretch of the dome (softens left-right falloff)
-thumb_dome_sx = 1.5;
-// Thumb: crest height below the (raised) crown
-thumb_crest_drop = 0.2;
-// Thumb: height of the touch surface where it reaches the front edge,
-// above the bottom rim. The waterfall is fitted to land here, so a
-// deeper (1.5U) or wider-topped (chiclet) cap keeps the same feel and
-// the same printable roof over the cavity instead of falling through.
-thumb_front_height = 3.3;
-// Thumb: extra body height at the back, tilted-style, so the surface
-// falls from a high back edge down to a low front
-thumb_back_rise = 0.8;
+// Tilt angle for tilted variants. Gentle, so the tilted rows read as a
+// continuation of the home row rather than a step up from it.
+tilt_angle = 8;
+// Crown height at the front footprint edge for tilted variants. Setting
+// this to crown_height makes the tilted cap's near edge meet the home
+// row at the same height — a seamless bowl across the three rows.
+tilt_front_height = 5.0;
 
 /* [Shell] */
 // Wall thickness at the bottom rim
@@ -135,8 +115,8 @@ pitch_y = size_type == "choc" ? 17.0 : 19.0;
 cap_w = base_w + (key_units   - 1) * pitch_x;
 cap_d = base_d + (key_units_y - 1) * pitch_y;
 
-// The dish/dome is stretched with the cap so bigger caps keep the same
-// scoop/slope character (matches the original 1.5U models).
+// The dish is stretched with the cap so bigger caps keep the same
+// scoop character (matches the original 1.5U models).
 dish_sx = cap_w / base_w;
 dish_sy = cap_d / base_d;
 
@@ -144,10 +124,7 @@ dish_sy = cap_d / base_d;
 //   choc stem: 2.05 mm, mx stem: 2.0 mm
 cavity_depth = stem_type == "choc" ? 2.05 : 2.0;
 
-is_tilted = variant == "tilted" || variant == "saddle_tilted";
-is_saddle = variant == "saddle" || variant == "saddle_tilted";
-// dome-shaped thumbs (convex crest + waterfall)
-is_thumb = variant == "thumb" || variant == "thumb_slope";
+is_tilted = variant == "tilted";
 
 // Effective sidewall inset and top edge rounding for the chosen style
 side_inset = side_style == "chiclet" ? chiclet_inset
@@ -162,11 +139,8 @@ top_d = cap_d - 2 * side_inset;
 function sag(r, w) = r - sqrt(r * r - w * w);
 
 // Local top-surface height (z below the crown, negative) on the cap
-// centerline at local y, per variant. Used to seat homing features.
-function surf_z(y) =
-    is_saddle
-        ? -(saddle_depth - sag(saddle_radius, y))
-        : -(dish_depth   - sag(dish_radius,   y));
+// centerline at local y. Used to seat homing features.
+function surf_z(y) = -(dish_depth - sag(dish_radius, y));
 
 // ------------------------------------------------------------------
 // 2D / plate helpers
@@ -180,24 +154,8 @@ module plate(w, d, r) {
     linear_extrude(eps) rrect(w, d, r);
 }
 
-// Front crown height for tilted variants. Saddle digs deeper, so its
-// tilted form starts a touch higher to keep the front skirt printable.
-tilt_front_h = (side_style == "chiclet" ? chiclet_tilt_front : tilt_front_height)
-             + (variant == "saddle_tilted" ? 0.3 : 0);
-
-// Effective crown height: the thumb body is a little taller so its
-// waterfall / plateau sits at a tilted-like high back edge.
-crown_h = crown_height + (is_thumb ? thumb_back_rise : 0);
-
-// Thumb waterfall: stretch the dome along Y so the surface has fallen
-// exactly to thumb_front_height by the time it reaches the front edge.
-// Ellipsoid sag over run R_y: D = R * (1 - sqrt(1 - (run/A)^2)), solved
-// for the semi-axis A, then expressed as a scale factor A / R.
-thumb_run  = top_d / 2 + cap_d / 2;
-thumb_drop = crown_h - thumb_crest_drop - thumb_front_height;
-thumb_k    = 1 - min(thumb_drop, thumb_dome_radius * 0.9) / thumb_dome_radius;
-thumb_sy   = thumb_run
-           / (thumb_dome_radius * sqrt(max(1 - thumb_k * thumb_k, 1e-6)));
+tilt_front_h = tilt_front_height;
+crown_h = crown_height;
 
 // Places children from top-plane local coordinates (origin at cap
 // center projected on the crown, z = 0 at the crown) into global
@@ -246,37 +204,10 @@ module dish_sphere() {
                 sphere(r = dish_radius);
 }
 
-// Saddle cutter: cylinder along the left-right axis, giving a
-// front/back valley (concave front-back, straight left-right).
-module saddle_dish() {
-    top_frame()
-        translate([0, 0, saddle_radius - saddle_depth])
-            rotate([0, 90, 0])
-                cylinder(r = saddle_radius, h = 60, center = true);
-}
-
-// Dome thumb keep-region: a single convex ellipsoid — no dish at all.
-// The crest sits on the raised back edge of the top face and the
-// surface waterfalls monotonically down to a low front, with a gentle
-// left-right barrel. One surface, no creases. For deep (thumb_slope)
-// caps the dome is stretched front-to-back (sy) so the same slope is
-// spread — "distributed" — over the whole length.
-module thumb_dome_keep() {
-    top_frame()
-        translate([0, top_d / 2, -thumb_crest_drop - thumb_dome_radius])
-            scale([thumb_dome_sx, thumb_sy, 1])
-                sphere(r = thumb_dome_radius);
-}
-
 module cap_top() {
     difference() {
-        intersection() {
-            cap_body();
-            if (is_thumb) thumb_dome_keep();
-        }
-        if (!is_thumb) {
-            if (is_saddle) saddle_dish(); else dish_sphere();
-        }
+        cap_body();
+        dish_sphere();
     }
 }
 

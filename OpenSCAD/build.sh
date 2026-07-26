@@ -15,14 +15,7 @@ declare -A VARIANTS=(
   [Normal]='-D variant="normal"'
   [Normal_Homing]='-D variant="normal" -D homing="bar"'
   [Normal_Tilted]='-D variant="tilted"'
-  [Thumb]='-D variant="thumb"'
-  [Saddle]='-D variant="saddle"'
-  [Saddle_Homing]='-D variant="saddle" -D homing="bar"'
-  [Saddle_Tilted]='-D variant="saddle_tilted"'
   [1.5U_Normal]='-D variant="normal" -D key_units=1.5'
-  # 1.5U-deep thumb key (stretched front-to-back): one continuous slope
-  # from a high back to a low front, distributed over the whole length.
-  [1.5U_Thumb_Slope]='-D variant="thumb_slope" -D key_units_y=1.5'
 )
 
 for stem in choc mx; do
