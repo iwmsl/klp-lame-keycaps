@@ -86,7 +86,13 @@ both the top and the bottom row (rotated 180°), so their left and
 right walls swap sides depending on the row anyway — mirroring them
 would buy nothing.
 
-- Size: approximately **165.0 × 112.9 × 26.8 mm** — fits the bed
+Finally every cap is spun in the build-plate plane so all 36 stems
+point the same way (`STEM_ANGLE_DEG`). Before this the three tip paths
+left stems at 0°, 90° and 180°; an in-plane spin does not change the
+contact face or its area, but it does make support, seam and cooling
+behave identically on every cap.
+
+- Size: approximately **156.1 × 91.0 × 26.8 mm** — fits the bed
 - 18 caps per block: 10 × Normal Tilted, 6 × Normal, 1 × Normal
   Homing, 1 × 1.5U Normal
 - Bed contact: **45.7 mm²** flat caps, **77.6 mm²** tilted. Caps stand
@@ -109,7 +115,7 @@ would buy nothing.
 
 Both plates fit the bed:
 
-- SideDown : ~165 × 82 mm, 26.8 mm tall (8 cols; tilted caps rear-down)
+- SideDown : ~157 × 60 mm, 26.8 mm tall (12 cols; tilted caps rear-down)
 - BottomDown: ~150 × 165 mm, 8.5 mm tall (5 cols)
 
 ## Slicing (Bambu Studio, A1 mini)

@@ -76,10 +76,12 @@ TEST_SIDE_OVERRIDES = {
     "Normal_Tilted": "rear",
 }
 
-# In-plane direction of the original +Z stem axis after a cap has been
-# laid down. 180 degrees matches the Normal key orientation. Rotating
-# around the build-plate Z axis does not change the selected contact face.
-TEST_STEM_ANGLE_DEG = 180.0
+# In-plane direction every cap's original +Z stem axis is turned to
+# once it has been laid down, so the stems all point the same way on
+# the plate and every cap meets support, seam and cooling under the same
+# conditions. Rotating about the build-plate Z axis does not change
+# the selected contact face or its area.
+STEM_ANGLE_DEG = 180.0
 
 SIDE_PRIORITY = {"left": 0, "right": 1, "front": 2, "rear": 3}
 MIN_MAIN_SIDE_AREA = 10.0
@@ -153,6 +155,24 @@ def prep(tris, side):
     """Orient a single cap: optional side tip, then drop onto z=0 and
     center its footprint on the origin."""
     return prep_rot(tris, SIDE_ROT_Y if side else 0)
+
+
+def stem_dir_after(rot, deg):
+    """In-plane direction the original +Z stem axis ends up pointing
+    after tipping a cap with `rot` by `deg`."""
+    probe = [[(0.0, 0.0, 0.0), (0.0, 0.0, 1.0), (0.0, 0.0, 0.0)]]
+    _, (vx, vy, _), _ = rot(probe, deg)[0]
+    return math.degrees(math.atan2(vy, vx))
+
+
+def tip_seat_align(tris, rot, deg):
+    """Tip a cap onto a wall, seat it, then spin it in the build-plate
+    plane so its stem axis points at STEM_ANGLE_DEG like every other
+    cap. The spin is purely in-plane, so the contact face and its area
+    are untouched; it only makes support, seam and cooling behave the
+    same way on every cap of the plate."""
+    seated = seat(rot(tris, deg))
+    return seat(rot_z(seated, STEM_ANGLE_DEG - stem_dir_after(rot, deg)))
 
 
 def tri_normal(a, b, c):
@@ -301,7 +321,7 @@ def prep_min_contact(tris, preferred_side=None):
     # an in-plane rotation, so the chosen supporting face and its area
     # stay exactly the same.
     stem_angle = math.degrees(math.atan2(matrix[1][2], matrix[0][2]))
-    in_plane_rotation = TEST_STEM_ANGLE_DEG - stem_angle
+    in_plane_rotation = STEM_ANGLE_DEG - stem_angle
     rotated = rot_z(rotated, in_plane_rotation)
 
     (mnx, mny, mnz), (mxx, mxy, _) = bounds(rotated)
@@ -311,7 +331,7 @@ def prep_min_contact(tris, preferred_side=None):
         "side": face["side"],
         "face_area": face["area"],
         "contact_area": contact,
-        "stem_angle": TEST_STEM_ANGLE_DEG,
+        "stem_angle": STEM_ANGLE_DEG,
     }
 
 
@@ -364,9 +384,10 @@ def cap_cells(side):
     caps = []
     for name, count in BOM:
         tris = load(os.path.join(STL_DIR, PREFIX + name + ".stl"))
-        p = (seat(rot_x(tris, rear_tip_angle(tris)))
+        p = (tip_seat_align(tris, rot_x, rear_tip_angle(tris))
              if side and name in REAR_DOWN_VARIANTS
-             else prep_rot(tris, side_tip_angle(tris, "right") if side else 0))
+             else tip_seat_align(tris, rot_y, side_tip_angle(tris, "right"))
+             if side else prep_rot(tris, 0))
         (mnx, mny, _), (mxx, mxy, _) = bounds(p)
         caps += [(p, mxx - mnx, mxy - mny)] * count
     return caps
@@ -407,9 +428,9 @@ def hand_cells(side):
     caps = []
     for name, count in HAND_BOM:
         tris = load(os.path.join(STL_DIR, PREFIX + name + ".stl"))
-        p = (seat(rot_x(tris, rear_tip_angle(tris)))
+        p = (tip_seat_align(tris, rot_x, rear_tip_angle(tris))
              if name in REAR_DOWN_VARIANTS
-             else prep_rot(tris, side_tip_angle(tris, side)))
+             else tip_seat_align(tris, rot_y, side_tip_angle(tris, side)))
         (mnx, mny, _), (mxx, mxy, _) = bounds(p)
         caps += [(p, mxx - mnx, mxy - mny)] * count
     return caps
