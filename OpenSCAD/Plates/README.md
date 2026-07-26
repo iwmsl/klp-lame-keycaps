@@ -8,13 +8,12 @@ Caps used: **MX Stem + Choc Size**.
 
 ## Trial plate — six selected variants
 
-`Plate_A1mini_Test_OneEach_MinContact.stl` contains one of each selected
+`Plate_A1mini_Test_OneEach_RearSideDown.stl` contains one of each selected
 first-print variant (six caps total). Saddle, Saddle Homing and Saddle
 Tilted remain available as individual STLs but are omitted from this
-trial plate. Each included mesh is inspected
-individually and placed on the **smallest usable flat outer side face**.
-The two Thumb variants are deliberately flipped to the opposite rear
-face because their smallest front wall is too narrow for a stable print.
+trial plate. The four 1U variants are placed on the **rear outer side
+face**—the upper side in the model's top view. The 1.5U Thumb Slope also
+uses its stable rear face; 1.5U Normal keeps its smallest usable side face.
 Inner cavity walls and tiny rounded/chamfer faces are excluded, so the
 choice is a real supporting face rather than an unstable edge or point.
 After the contact face is chosen, every cap is rotated only within the
@@ -30,9 +29,8 @@ This final rotation does not change contact area or stability.
 | 1 | Normal | Normal Homing | Normal Tilted |
 | 2 | Thumb | 1.5U Normal | 1.5U Thumb Slope |
 
-The selected face is left for Normal, Normal Homing, Normal Tilted and
-1.5U Normal. Thumb and 1.5U Thumb Slope use the opposite rear face for
-better stability.
+The selected face is rear for Normal, Normal Homing, Normal Tilted,
+Thumb and 1.5U Thumb Slope. 1.5U Normal uses its left side face.
 
 This orientation still keeps contact marks small while giving both thumb
 profiles a more secure base. Use tree supports and an **8 mm brim** for

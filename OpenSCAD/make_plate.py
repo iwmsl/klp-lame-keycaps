@@ -4,10 +4,9 @@
 Reads the built angular STLs and writes:
   - <out>_BottomDown.stl : caps upright (bottom/stem toward the bed)
   - <out>_SideDown.stl   : caps laid on a side wall (best top surface)
-  - <out>_Test_OneEach_MinContact.stl : one of every selected trial
-    variant, with
-    each cap resting on its smallest usable outer side face, except
-    thumb variants which use the opposite rear face for stability
+  - <out>_Test_OneEach_RearSideDown.stl : one of every selected trial
+    variant. The four 1U caps rest on the rear outer side face (the
+    upper side in top view); 1.5U caps keep their selected stable face.
 
 Both are laid out to fit the A1 mini's 180 x 180 mm bed. Import a plate
 into Bambu Studio, add supports (tree, for the overhangs), and slice.
@@ -49,10 +48,13 @@ TEST_VARIANTS = [
     "1.5U_Thumb_Slope",
 ]
 
-# The smallest face on the two thumb profiles is the low front wall,
-# but it is too narrow for a stable first print. Flip them front-to-rear
-# and use the larger rear wall instead.
+# The four 1U profiles use the rear outer side face (the upper side in
+# top view). The 1.5U thumb profile also uses its larger rear wall for
+# stability; 1.5U Normal keeps its automatically selected minimum face.
 TEST_SIDE_OVERRIDES = {
+    "Normal": "rear",
+    "Normal_Homing": "rear",
+    "Normal_Tilted": "rear",
     "Thumb": "rear",
     "1.5U_Thumb_Slope": "rear",
 }
@@ -387,4 +389,4 @@ if __name__ == "__main__":
         build(True, os.path.join(out_dir, "Plate_A1mini_SideDown.stl"))
     if mode in {"all", "test"}:
         build_test(os.path.join(
-            out_dir, "Plate_A1mini_Test_OneEach_MinContact.stl"))
+            out_dir, "Plate_A1mini_Test_OneEach_RearSideDown.stl"))

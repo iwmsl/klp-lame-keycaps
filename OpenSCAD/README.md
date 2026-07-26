@@ -51,7 +51,7 @@ original STLs, so switch fit is identical to the originals.
 
 | ファイル | 向き | 特徴 |
 | :--- | :--- | :--- |
-| `Plates/Plate_A1mini_Test_OneEach_MinContact.stl` | 各モデルの最小側面を下。Thumb系のみ上下反転して後面を下 | Saddle系を除く6種を各1個。約45.0×37.0mm。8mmブリム推奨 |
+| `Plates/Plate_A1mini_Test_OneEach_RearSideDown.stl` | 1Uは上側（rear）の側面を下。1.5Uは安定する選択面を下 | Saddle系を除く6種を各1個。8mmブリム推奨 |
 | `Plates/Plate_A1mini_SideDown.stl` | 側面を下(横倒し) | 天面に積層痕が出ず手触り良好。サポート要(推奨) |
 | `Plates/Plate_A1mini_BottomDown.stl` | 底面を下(上向き) | 配置が単純。天面は積層痕が出る。サポート＋ブリム推奨 |
 
