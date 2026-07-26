@@ -2,14 +2,21 @@
 """Arrange KLP Lamé Angular keycaps for the Bambu Lab A1 mini.
 
 Reads the built angular STLs and writes:
+  - <out>_Corne36_LeftRight.stl : the whole 36-cap Corne set, the left
+    hand laid on each cap's left side wall and the right hand on its
+    right one
   - <out>_BottomDown.stl : caps upright (bottom/stem toward the bed)
   - <out>_SideDown.stl   : caps laid on a side wall (best top surface)
-  - <out>_Test_OneEach_RearSideDown.stl : one of every selected trial
-    variant. Normal, Normal Tilted and Thumb rest on the rear outer side
-    face; Normal Homing and the 1.5U caps keep a selected stable side.
+  - <out>_Test_OneEach_RearSideDown.stl : one of every variant. Normal
+    and Normal Tilted rest on the rear outer side face; Normal Homing
+    and 1.5U Normal keep a selected stable side.
 
-Both are laid out to fit the A1 mini's 180 x 180 mm bed. Import a plate
-into Bambu Studio, add supports (tree, for the overhangs), and slice.
+Caps laid on a side wall are tipped by an angle derived from that
+model's own wall normal, so flat and tilted caps both seat flat.
+
+All plates are laid out to fit the A1 mini's 180 x 180 mm bed. Import a
+plate into Bambu Studio, add supports (tree, for the overhangs), and
+slice.
 """
 import math
 import os
