@@ -2,3 +2,6 @@
 *.DS_Store
 
 Lychee
+
+__pycache__/
+*.pyc
