@@ -5,8 +5,8 @@ Reads the built angular STLs and writes:
   - <out>_BottomDown.stl : caps upright (bottom/stem toward the bed)
   - <out>_SideDown.stl   : caps laid on a side wall (best top surface)
   - <out>_Test_OneEach_RearSideDown.stl : one of every selected trial
-    variant. The four 1U caps rest on the rear outer side face (the
-    upper side in top view); 1.5U caps keep their selected stable face.
+    variant. Normal, Normal Tilted and Thumb rest on the rear outer side
+    face; Normal Homing and the 1.5U caps keep a selected stable side.
 
 Both are laid out to fit the A1 mini's 180 x 180 mm bed. Import a plate
 into Bambu Studio, add supports (tree, for the overhangs), and slice.
@@ -48,12 +48,12 @@ TEST_VARIANTS = [
     "1.5U_Thumb_Slope",
 ]
 
-# The four 1U profiles use the rear outer side face (the upper side in
-# top view). The 1.5U thumb profile also uses its larger rear wall for
-# stability; 1.5U Normal keeps its automatically selected minimum face.
+# Normal, Normal Tilted and Thumb use the rear outer side face (the upper
+# side in top view). Normal Homing uses its automatically selected side
+# to reduce support material. The 1.5U thumb profile uses its larger rear
+# wall for stability; 1.5U Normal keeps its selected minimum face.
 TEST_SIDE_OVERRIDES = {
     "Normal": "rear",
-    "Normal_Homing": "rear",
     "Normal_Tilted": "rear",
     "Thumb": "rear",
     "1.5U_Thumb_Slope": "rear",
