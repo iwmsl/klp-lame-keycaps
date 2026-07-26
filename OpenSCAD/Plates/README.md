@@ -67,10 +67,18 @@ same parts — only the orientation differs. Printing each hand on its
 own side means the support scars and any elephant foot end up on
 mirrored walls, so the assembled keyboard stays symmetric.
 
-- Size: approximately **157.2 × 91.0 × 26.8 mm** — fits the bed
+The tip angle is taken from **each model's own side-wall normal**, not
+from one shared constant: a Normal cap's side wall leans 12.8° from
+vertical, but Normal Tilted's leans only 7.8° because its top edge is
+raked. Tipping both by the same amount would leave the tilted cap
+balanced on one edge with the rest of the wall lifted off the plate —
+which the slicer fills in with support. Per-model angles put every cap
+flat on its wall (Normal Tilted: 0 → 40.9 mm² of contact).
+
+- Size: approximately **156.8 × 91.0 × 26.8 mm** — fits the bed
 - 18 caps per block: 10 × Normal Tilted, 6 × Normal, 1 × Normal
   Homing, 1 × 1.5U Normal
-- Each cap stands on a side wall (~48–81 mm² of contact) and is up to
+- Each cap stands on a side wall (~41–48 mm² of contact) and is up to
   26.8 mm tall, so use tree supports and an **8 mm brim**
 
 ## Full 36-key Corne set
@@ -90,7 +98,7 @@ mirrored walls, so the assembled keyboard stays symmetric.
 
 Both plates fit the bed:
 
-- SideDown : ~158 × 60 mm, 26.8 mm tall (12 cols)
+- SideDown : ~158 × 60 mm, 26.8 mm tall (12 cols; per-model tip angles)
 - BottomDown: ~150 × 165 mm, 8.5 mm tall (5 cols)
 
 ## Slicing (Bambu Studio, A1 mini)

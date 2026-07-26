@@ -306,12 +306,29 @@ def write_stl(path, tris):
             f.write(struct.pack("<H", 0))
 
 
+def side_tip_angle(tris, side):
+    """Rotation about Y that lays the named outer side wall flat on the
+    bed, derived from that wall's own normal.
+
+    A single fixed angle is not enough: a Normal cap's side wall leans
+    12.8 deg from vertical, but a tilted cap's leans only 7.8 deg
+    because its top edge is raked. Tipping both by the same amount
+    leaves the tilted cap resting on one edge with the rest of the wall
+    lifted off the plate, which the slicer then fills with support.
+    """
+    for f in main_side_faces(tris):
+        if f["side"] == side:
+            nx, _, nz = f["normal"]
+            return 180.0 - math.degrees(math.atan2(nx, nz))
+    return SIDE_ROT_Y if side == "right" else -SIDE_ROT_Y
+
+
 def cap_cells(side):
     """One prepped cap per BOM entry × count, plus its footprint size."""
     caps = []
     for name, count in BOM:
         tris = load(os.path.join(STL_DIR, PREFIX + name + ".stl"))
-        p = prep(tris, side)
+        p = prep_rot(tris, side_tip_angle(tris, "right") if side else 0)
         (mnx, mny, _), (mxx, mxy, _) = bounds(p)
         caps += [(p, mxx - mnx, mxy - mny)] * count
     return caps
@@ -342,12 +359,14 @@ def build(side, out):
           f"({'FITS' if max(mxx-mnx, mxy-mny) <= BED else 'TOO BIG'})")
 
 
-def hand_cells(rot_deg):
-    """One hand's worth of caps, each tipped onto the given side wall."""
+def hand_cells(side):
+    """One hand's worth of caps, each tipped so that its `side` wall
+    ("left" or "right") lies flat on the bed. The angle is taken from
+    each model's own wall normal, so tilted caps seat flat too."""
     caps = []
     for name, count in HAND_BOM:
         tris = load(os.path.join(STL_DIR, PREFIX + name + ".stl"))
-        p = prep_rot(tris, rot_deg)
+        p = prep_rot(tris, side_tip_angle(tris, side))
         (mnx, mny, _), (mxx, mxy, _) = bounds(p)
         caps += [(p, mxx - mnx, mxy - mny)] * count
     return caps
@@ -358,8 +377,8 @@ def build_hands(out):
     on their left side wall and the right hand's on their right side
     wall. The rear block is the left hand, the front block the right."""
     groups = [
-        ("left", sorted(hand_cells(-SIDE_ROT_Y), key=lambda c: c[2])),
-        ("right", sorted(hand_cells(+SIDE_ROT_Y), key=lambda c: c[2])),
+        ("left", sorted(hand_cells("left"), key=lambda c: c[2])),
+        ("right", sorted(hand_cells("right"), key=lambda c: c[2])),
     ]
     cw = max(c[1] for _, g in groups for c in g) + GAP
     usable = BED - 2 * MARGIN
