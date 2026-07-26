@@ -70,6 +70,9 @@ tilt_angle = 15;
 // Crown height at the front footprint edge for tilted variants
 // (kept high enough that the low front edge keeps a printable roof)
 tilt_front_height = 4.0;
+// chiclet: the larger top face reaches further back, so the rear rises
+// more per degree of tilt — start lower to keep the cap low-profile
+chiclet_tilt_front = 3.0;
 // Saddle: front/back cylindrical valley depth at center, below crown
 saddle_depth = 1.5;
 // Saddle: radius of the front/back valley cylinder (axis left-right)
@@ -80,6 +83,11 @@ thumb_dome_radius = 38;
 thumb_dome_sx = 1.5;
 // Thumb: crest height below the (raised) crown
 thumb_crest_drop = 0.2;
+// Thumb: height of the touch surface where it reaches the front edge,
+// above the bottom rim. The waterfall is fitted to land here, so a
+// deeper (1.5U) or wider-topped (chiclet) cap keeps the same feel and
+// the same printable roof over the cavity instead of falling through.
+thumb_front_height = 3.3;
 // Thumb: extra body height at the back, tilted-style, so the surface
 // falls from a high back edge down to a low front
 thumb_back_rise = 0.8;
@@ -174,11 +182,22 @@ module plate(w, d, r) {
 
 // Front crown height for tilted variants. Saddle digs deeper, so its
 // tilted form starts a touch higher to keep the front skirt printable.
-tilt_front_h = tilt_front_height + (variant == "saddle_tilted" ? 0.3 : 0);
+tilt_front_h = (side_style == "chiclet" ? chiclet_tilt_front : tilt_front_height)
+             + (variant == "saddle_tilted" ? 0.3 : 0);
 
 // Effective crown height: the thumb body is a little taller so its
 // waterfall / plateau sits at a tilted-like high back edge.
 crown_h = crown_height + (is_thumb ? thumb_back_rise : 0);
+
+// Thumb waterfall: stretch the dome along Y so the surface has fallen
+// exactly to thumb_front_height by the time it reaches the front edge.
+// Ellipsoid sag over run R_y: D = R * (1 - sqrt(1 - (run/A)^2)), solved
+// for the semi-axis A, then expressed as a scale factor A / R.
+thumb_run  = top_d / 2 + cap_d / 2;
+thumb_drop = crown_h - thumb_crest_drop - thumb_front_height;
+thumb_k    = 1 - min(thumb_drop, thumb_dome_radius * 0.9) / thumb_dome_radius;
+thumb_sy   = thumb_run
+           / (thumb_dome_radius * sqrt(max(1 - thumb_k * thumb_k, 1e-6)));
 
 // Places children from top-plane local coordinates (origin at cap
 // center projected on the crown, z = 0 at the crown) into global
@@ -243,10 +262,9 @@ module saddle_dish() {
 // caps the dome is stretched front-to-back (sy) so the same slope is
 // spread — "distributed" — over the whole length.
 module thumb_dome_keep() {
-    sy = variant == "thumb_slope" ? dish_sy : 1;
     top_frame()
         translate([0, top_d / 2, -thumb_crest_drop - thumb_dome_radius])
-            scale([thumb_dome_sx, sy, 1])
+            scale([thumb_dome_sx, thumb_sy, 1])
                 sphere(r = thumb_dome_radius);
 }
 
