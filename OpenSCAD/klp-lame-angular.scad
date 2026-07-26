@@ -33,10 +33,24 @@ variant = "normal"; // [normal, tilted, thumb, thumb_slope, saddle, saddle_tilte
 homing = "none"; // [none, bar, dots]
 
 /* [Body] */
+// Sidewall style — how the cap goes from its full-size bottom rim up
+// to the touch surface. Drives how big the visible gap between caps is.
+//   wide    : straight taper, classic sculpted look (biggest gap)
+//   chiclet : near-vertical walls, large top, LAK/laptop-like (tightest)
+//   skirt   : vertical skirt at the bottom, then taper above
+side_style = "wide"; // [wide, chiclet, skirt]
 // Height of the crown (top edge of the cap) above the bottom rim
 crown_height = 5.0;
-// How much each side face leans in from bottom to top (per side)
+// wide: how much each side face leans in from bottom to top (per side)
 top_inset = 2.0;
+// chiclet: side inset per side (small = walls almost vertical)
+chiclet_inset = 0.75;
+// chiclet: rounding of the top perimeter edge (larger, softer bevel)
+chiclet_edge_round = 1.3;
+// skirt: height of the vertical full-size skirt at the bottom
+skirt_height = 1.5;
+// skirt: side inset per side above the skirt
+skirt_inset = 1.5;
 // Corner radius of the bottom footprint (vertical corners)
 corner_radius = 1.9;
 // Corner radius of the top face (vertical corners)
@@ -104,10 +118,12 @@ eps = 0.01;
 //   choc size: 17.5 x 16.5 mm, mx size: 18 x 18 mm
 //   1.5U choc: 26.5 x 16.5 mm (= 17.5 + 0.5 * 18 mm pitch), as in the
 //   original 1.5U models. Wider caps grow along X, stem stays centered.
+// choc size: 17.5 x 16.5 on 18/17 mm pitch
+// mx size  : 18 x 18 on 19 mm pitch (1 mm gap between caps at the rim)
 base_w = size_type == "choc" ? 17.5 : 18.0;
 base_d = size_type == "choc" ? 16.5 : 18.0;
-pitch_x = size_type == "choc" ? 18.0 : 19.05;
-pitch_y = size_type == "choc" ? 17.0 : 19.05;
+pitch_x = size_type == "choc" ? 18.0 : 19.0;
+pitch_y = size_type == "choc" ? 17.0 : 19.0;
 cap_w = base_w + (key_units   - 1) * pitch_x;
 cap_d = base_d + (key_units_y - 1) * pitch_y;
 
@@ -125,8 +141,14 @@ is_saddle = variant == "saddle" || variant == "saddle_tilted";
 // dome-shaped thumbs (convex crest + waterfall)
 is_thumb = variant == "thumb" || variant == "thumb_slope";
 
-top_w = cap_w - 2 * top_inset;
-top_d = cap_d - 2 * top_inset;
+// Effective sidewall inset and top edge rounding for the chosen style
+side_inset = side_style == "chiclet" ? chiclet_inset
+           : side_style == "skirt"   ? skirt_inset
+           :                           top_inset;
+top_edge_r = side_style == "chiclet" ? chiclet_edge_round : top_edge_round;
+
+top_w = cap_w - 2 * side_inset;
+top_d = cap_d - 2 * side_inset;
 
 // Sagitta of a circle: rise of the arc at horizontal offset w from apex
 function sag(r, w) = r - sqrt(r * r - w * w);
@@ -182,13 +204,17 @@ module cap_body() {
               max(corner_radius - bottom_edge_round, 0.1));
         translate([0, 0, bottom_edge_round])
             plate(cap_w, cap_d, corner_radius);
+        // vertical full-size skirt before the taper starts
+        if (side_style == "skirt")
+            translate([0, 0, skirt_height])
+                plate(cap_w, cap_d, corner_radius);
         // flat tapered sides up to just below the crown, then rounded
         // top edge into the (inset) crown face
-        top_frame() translate([0, 0, -top_edge_round])
+        top_frame() translate([0, 0, -top_edge_r])
             plate(top_w, top_d, top_corner_radius);
         top_frame()
-            plate(top_w - 2 * top_edge_round, top_d - 2 * top_edge_round,
-                  max(top_corner_radius - top_edge_round, 0.1));
+            plate(top_w - 2 * top_edge_r, top_d - 2 * top_edge_r,
+                  max(top_corner_radius - top_edge_r, 0.1));
     }
 }
 
