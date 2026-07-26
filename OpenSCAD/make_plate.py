@@ -55,6 +55,10 @@ HAND_BOM = [
 # orientations stay easy to tell apart on the plate.
 HAND_GAP = 10.0
 
+# Variants printed on their rear wall rather than a left/right one,
+# because the rake leaves their side walls non-planar.
+REAR_DOWN_VARIANTS = {"Normal_Tilted"}
+
 # Every variant, one each. Order is the documented 2 x 2 layout, read
 # left-to-right and top-to-bottom.
 TEST_VARIANTS = [
@@ -102,6 +106,12 @@ def load(path):
     return tris
 
 
+def rot_x(t, deg):
+    a = math.radians(deg)
+    c, s = math.cos(a), math.sin(a)
+    return [[(x, y * c - z * s, y * s + z * c) for (x, y, z) in tri] for tri in t]
+
+
 def rot_y(t, deg):
     a = math.radians(deg)
     c, s = math.cos(a), math.sin(a)
@@ -126,15 +136,17 @@ def translate(t, dx, dy, dz):
     return [[(x + dx, y + dy, z + dz) for (x, y, z) in tri] for tri in t]
 
 
-def prep_rot(tris, deg):
-    """Tip a cap `deg` about Y, then drop it onto z=0 and centre its
-    footprint on the origin. +SIDE_ROT_Y seats the right side wall on
-    the bed, -SIDE_ROT_Y the left one."""
-    if deg:
-        tris = rot_y(tris, deg)
+def seat(tris):
+    """Drop a cap onto z=0 and centre its footprint on the origin."""
     (mnx, mny, mnz), (mxx, mxy, mxz) = bounds(tris)
     cx, cy = (mnx + mxx) / 2, (mny + mxy) / 2
     return translate(tris, -cx, -cy, -mnz)
+
+
+def prep_rot(tris, deg):
+    """Tip a cap `deg` about Y, then seat it. +SIDE_ROT_Y puts the
+    right side wall on the bed, -SIDE_ROT_Y the left one."""
+    return seat(rot_y(tris, deg) if deg else tris)
 
 
 def prep(tris, side):
@@ -330,12 +342,31 @@ def side_tip_angle(tris, side):
     return SIDE_ROT_Y if side == "right" else -SIDE_ROT_Y
 
 
+def rear_tip_angle(tris):
+    """Rotation about X that lays the rear outer wall flat on the bed.
+
+    A tilted cap's left/right walls are not planar: the tilt rakes the
+    top edge while the bottom rim stays level, so the two edges are
+    skew and the wall between them is a twisted ruled surface (0.19 mm
+    of warp). Its front and rear walls keep parallel top and bottom
+    edges and so stay flat, and the rear one is the taller — and
+    therefore larger — of the two.
+    """
+    for f in main_side_faces(tris):
+        if f["side"] == "rear":
+            _, ny, nz = f["normal"]
+            return math.degrees(math.atan2(ny, nz)) - 180.0
+    return -SIDE_ROT_Y
+
+
 def cap_cells(side):
     """One prepped cap per BOM entry × count, plus its footprint size."""
     caps = []
     for name, count in BOM:
         tris = load(os.path.join(STL_DIR, PREFIX + name + ".stl"))
-        p = prep_rot(tris, side_tip_angle(tris, "right") if side else 0)
+        p = (seat(rot_x(tris, rear_tip_angle(tris)))
+             if side and name in REAR_DOWN_VARIANTS
+             else prep_rot(tris, side_tip_angle(tris, "right") if side else 0))
         (mnx, mny, _), (mxx, mxy, _) = bounds(p)
         caps += [(p, mxx - mnx, mxy - mny)] * count
     return caps
@@ -367,13 +398,18 @@ def build(side, out):
 
 
 def hand_cells(side):
-    """One hand's worth of caps, each tipped so that its `side` wall
-    ("left" or "right") lies flat on the bed. The angle is taken from
-    each model's own wall normal, so tilted caps seat flat too."""
+    """One hand's worth of caps, each tipped onto a flat outer wall.
+
+    Flat caps go onto the hand's own `side` wall ("left" or "right").
+    Tilted caps go onto their rear wall instead: their side walls are
+    warped by the rake (see rear_tip_angle), while the rear wall is
+    both planar and the largest of the four."""
     caps = []
     for name, count in HAND_BOM:
         tris = load(os.path.join(STL_DIR, PREFIX + name + ".stl"))
-        p = prep_rot(tris, side_tip_angle(tris, side))
+        p = (seat(rot_x(tris, rear_tip_angle(tris)))
+             if name in REAR_DOWN_VARIANTS
+             else prep_rot(tris, side_tip_angle(tris, side)))
         (mnx, mny, _), (mxx, mxy, _) = bounds(p)
         caps += [(p, mxx - mnx, mxy - mny)] * count
     return caps

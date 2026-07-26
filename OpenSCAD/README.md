@@ -60,7 +60,7 @@ original STLs, so switch fit is identical to the originals.
 
 | ファイル | 向き | 特徴 |
 | :--- | :--- | :--- |
-| **`Plates/Plate_A1mini_Corne36_LeftRight.stl`** | **左手分は左側面を下、右手分は右側面を下** | **36キー一括。奥ブロック=左手18個 / 手前ブロック=右手18個。157×91mm、8mmブリム推奨** |
+| **`Plates/Plate_A1mini_Corne36_LeftRight.stl`** | **左手分は左側面、右手分は右側面を下。Tiltedのみ両手とも後面(側面はねじれ面のため)** | **36キー一括。奥=左手18個 / 手前=右手18個。165×113mm、8mmブリム推奨** |
 | `Plates/Plate_A1mini_Test_OneEach_RearSideDown.stl` | Normal / Normal Tilted は後側面を下、ほかは自動選択面 | 全4種を各1個。8mmブリム推奨 |
 | `Plates/Plate_A1mini_SideDown.stl` | 側面を下(横倒し) | 天面に積層痕が出ず手触り良好。サポート要(推奨) |
 | `Plates/Plate_A1mini_BottomDown.stl` | 底面を下(上向き) | 配置が単純。天面は積層痕が出る。サポート＋ブリム推奨 |

@@ -57,29 +57,40 @@ and the first floating edges.
 The whole 36-cap set on a single plate, split into two blocks by print
 orientation:
 
-| Block | Hand | Orientation |
-| :---- | :--- | :---------- |
-| Rear (+Y) | Left | laid on the cap's **left** side wall |
-| Front (−Y) | Right | laid on the cap's **right** side wall |
+| Block | Hand | Flat caps | Tilted caps |
+| :---- | :--- | :-------- | :---------- |
+| Rear (+Y) | Left | on the cap's **left** side wall | on the **rear** wall |
+| Front (−Y) | Right | on the cap's **right** side wall | on the **rear** wall |
 
 The caps themselves are left-right symmetric, so both hands use the
 same parts — only the orientation differs. Printing each hand on its
 own side means the support scars and any elephant foot end up on
 mirrored walls, so the assembled keyboard stays symmetric.
 
-The tip angle is taken from **each model's own side-wall normal**, not
-from one shared constant: a Normal cap's side wall leans 12.8° from
+The tip angle is taken from **each model's own wall normal**, not from
+one shared constant: a Normal cap's side wall leans 12.8° from
 vertical, but Normal Tilted's leans only 7.8° because its top edge is
 raked. Tipping both by the same amount would leave the tilted cap
-balanced on one edge with the rest of the wall lifted off the plate —
-which the slicer fills in with support. Per-model angles put every cap
-flat on its wall (Normal Tilted: 0 → 40.9 mm² of contact).
+balanced on one edge with the rest of the wall lifted off the plate.
 
-- Size: approximately **156.8 × 91.0 × 26.8 mm** — fits the bed
+**Tilted caps additionally go rear-wall-down on both hands.** The rake
+lifts the top edge while the bottom rim stays level, so the two edges
+of a tilted cap's left and right walls are skew and the wall between
+them is a twisted ruled surface — 0.19 mm of warp, about two layers.
+Even at the correct tip angle only 40.0 mm² of that 64.7 mm² wall
+really touches the plate, and the slicer props up the rest. The front
+and rear walls keep parallel top and bottom edges and so stay truly
+flat (0.026 mm, same as a Normal cap), and the rear one is the taller
+and larger of the two: **77.6 mm² of real contact**. Tilted caps serve
+both the top and the bottom row (rotated 180°), so their left and
+right walls swap sides depending on the row anyway — mirroring them
+would buy nothing.
+
+- Size: approximately **165.0 × 112.9 × 26.8 mm** — fits the bed
 - 18 caps per block: 10 × Normal Tilted, 6 × Normal, 1 × Normal
   Homing, 1 × 1.5U Normal
-- Each cap stands on a side wall (~41–48 mm² of contact) and is up to
-  26.8 mm tall, so use tree supports and an **8 mm brim**
+- Bed contact: **45.7 mm²** flat caps, **77.6 mm²** tilted. Caps stand
+  up to 26.8 mm tall, so use tree supports and an **8 mm brim**
 
 ## Full 36-key Corne set
 
@@ -98,7 +109,7 @@ flat on its wall (Normal Tilted: 0 → 40.9 mm² of contact).
 
 Both plates fit the bed:
 
-- SideDown : ~158 × 60 mm, 26.8 mm tall (12 cols; per-model tip angles)
+- SideDown : ~165 × 82 mm, 26.8 mm tall (8 cols; tilted caps rear-down)
 - BottomDown: ~150 × 165 mm, 8.5 mm tall (5 cols)
 
 ## Slicing (Bambu Studio, A1 mini)
