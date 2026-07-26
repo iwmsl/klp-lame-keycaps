@@ -26,7 +26,7 @@ VARIANTS = [
     "1.5U_Thumb_Slope",
 ]
 
-TOP_DOWN_VARIANTS = {
+REAR_SIDE_DOWN_VARIANTS = {
     "Normal",
     "Normal_Homing",
     "Normal_Tilted",
@@ -41,24 +41,6 @@ DISPLAY_NAMES = {
     "1.5U_Normal": "1.5U Normal",
     "1.5U_Thumb_Slope": "1.5U Thumb Slope",
 }
-
-
-def prep_top_down(plate, tris):
-    """Place the keycap touch surface toward the build plate.
-
-    The source STLs are upright, with their touch surface at +Z. A 180°
-    rotation around Y points that surface downward and leaves the stem
-    opening facing upward.
-    """
-    rotated = plate.rot_y(tris, 180)
-    (mnx, mny, mnz), (mxx, mxy, _) = plate.bounds(rotated)
-    oriented = plate.translate(
-        rotated,
-        -(mnx + mxx) / 2,
-        -(mny + mxy) / 2,
-        -mnz,
-    )
-    return oriented
 
 
 def load_plate_module(repo_root: Path):
@@ -76,16 +58,13 @@ def arrange_caps(plate):
     for name in VARIANTS:
         source = Path(plate.STL_DIR) / f"{plate.PREFIX}{name}.stl"
         tris = plate.load(source)
-        if name in TOP_DOWN_VARIANTS:
-            oriented = prep_top_down(plate, tris)
-            contact_area = None
-            orientation = "top down"
+        if name in REAR_SIDE_DOWN_VARIANTS:
+            preferred_side = "rear"
         else:
-            oriented, info = plate.prep_min_contact(
-                tris, preferred_side=plate.TEST_SIDE_OVERRIDES.get(name)
-            )
-            contact_area = info["contact_area"]
-            orientation = f"{info['side']} side down"
+            preferred_side = plate.TEST_SIDE_OVERRIDES.get(name)
+        oriented, info = plate.prep_min_contact(
+            tris, preferred_side=preferred_side
+        )
         (mnx, mny, _), (mxx, mxy, _) = plate.bounds(oriented)
         caps.append(
             {
@@ -94,8 +73,8 @@ def arrange_caps(plate):
                 "tris": oriented,
                 "width": mxx - mnx,
                 "depth": mxy - mny,
-                "contact_area": contact_area,
-                "orientation": orientation,
+                "contact_area": info["contact_area"],
+                "orientation": f"{info['side']} side down",
             }
         )
 
@@ -370,15 +349,11 @@ def main():
         f"{mxx - mnx:.3f} x {mxy - mny:.3f} x {mxz - mnz:.3f} mm"
     )
     for cap in caps:
-        contact = (
-            ""
-            if cap["contact_area"] is None
-            else f", {cap['contact_area']:.1f} mm^2 contact"
-        )
         print(
             f"  {cap['display_name']}: "
             f"{len(cap['tris'])} triangles, "
-            f"{cap['orientation']}{contact}"
+            f"{cap['orientation']}, "
+            f"{cap['contact_area']:.1f} mm^2 contact"
         )
 
 

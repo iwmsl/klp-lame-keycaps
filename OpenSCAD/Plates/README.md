@@ -46,9 +46,10 @@ as separately selectable objects and embeds a conservative A1 mini /
 process preset is `KLP_Lame_A1mini_PLA_Quality_Process.json`.
 
 The four 1U variants (Normal, Normal Homing, Normal Tilted and Thumb)
-are placed with the touch surface toward the build plate and the stem
-opening upward. The two 1.5U variants keep their minimum-contact side
-orientation.
+are placed with the **rear outer side face**—the upper side in the model's
+top view—toward the build plate. This keeps them side-down rather than
+putting the touch surface on the bed. The two 1.5U variants keep their
+minimum-contact side orientation.
 
 The embedded profile uses 0.12 mm layers, slower first-layer and wall
 speeds, an 8 mm outer brim, and dense Normal/Snug support interfaces. It
