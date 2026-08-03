@@ -2,17 +2,16 @@
 """Arrange KLP Lamé Angular keycaps for the Bambu Lab A1 mini.
 
 Reads the built angular STLs and writes:
-  - <out>_Corne36_LeftRight.stl : the whole 36-cap Corne set, the left
-    hand laid on each cap's left side wall and the right hand on its
-    right one
+  - <out>_Corne36_RearDown.stl : the whole 36-cap Corne set laid on the
+    vertical rear wall — the print-optimal orientation, with no
+    outward-leaning outer surface anywhere
   - <out>_BottomDown.stl : caps upright (bottom/stem toward the bed)
-  - <out>_SideDown.stl   : caps laid on a side wall (best top surface)
-  - <out>_Test_OneEach_RearSideDown.stl : one of every variant. Normal
-    and Normal Tilted rest on the rear outer side face; Normal Homing
-    and 1.5U Normal keep a selected stable side.
+  - <out>_Test_OneEach_RearSideDown.stl : one of every variant,
+    rear-wall-down
 
-Caps laid on a side wall are tipped by an angle derived from that
-model's own wall normal, so flat and tilted caps both seat flat.
+The tip angle comes from each model's own rear-wall normal (flat caps
+are exactly 90 deg; the tilted cap's wall leans a hair inward), so
+every cap seats dead flat.
 
 All plates are laid out to fit the A1 mini's 180 x 180 mm bed. Import a
 plate into Bambu Studio, add supports (tree, for the overhangs), and
@@ -26,9 +25,6 @@ import sys
 BED = 180.0
 MARGIN = 6.0
 GAP = 3.0
-# Lay the (drafted) side wall flat. The chiclet wall leans ~12.8 deg
-# from vertical, so tip the cap 90+12.8 deg about Y to seat the wall.
-SIDE_ROT_Y = 102.8
 
 STL_DIR = os.path.join(os.path.dirname(__file__), "STL", "MX Stem + MX Size")
 PREFIX = "MX_Stem_MX_Size_Angular_"
@@ -41,23 +37,12 @@ BOM = [
     ("1.5U_Normal", 2),         # thumbs: one 1.5U per hand
 ]
 
-# One hand of a Corne v4 Mini (3 x 5 + 3 = 18 caps). The caps are
-# left-right symmetric, so the two hands use the same parts; only the
-# print orientation differs on the Corne36_LeftRight plate.
-HAND_BOM = [
-    ("Normal_Tilted", 10),      # top row 5 + bottom row 5
-    ("Normal", 6),              # home row 4 + 1U thumbs 2
-    ("Normal_Homing", 1),       # index home key
-    ("1.5U_Normal", 1),         # 1.5U thumb
-]
 
-# Extra spacing between the left-hand and right-hand blocks so the two
-# orientations stay easy to tell apart on the plate.
-HAND_GAP = 10.0
-
-# Variants printed on their rear wall rather than a left/right one,
-# because the rake leaves their side walls non-planar.
-REAR_DOWN_VARIANTS = {"Normal_Tilted"}
+# With the vertical rear wall every cap prints rear-face-down: laid on
+# that wall the crown, rim and side walls are all vertical or face up,
+# so nothing on the outside leans outward as it grows.
+REAR_DOWN_VARIANTS = {"Normal", "Normal_Homing", "Normal_Tilted",
+                      "1.5U_Normal"}
 
 # Every variant, one each. Order is the documented 2 x 2 layout, read
 # left-to-right and top-to-bottom.
@@ -71,10 +56,7 @@ TEST_VARIANTS = [
 # Normal and Normal Tilted use the rear outer side face (the upper side
 # in top view). Normal Homing and 1.5U Normal keep their automatically
 # selected side face, which needs less support material.
-TEST_SIDE_OVERRIDES = {
-    "Normal": "rear",
-    "Normal_Tilted": "rear",
-}
+TEST_SIDE_OVERRIDES = {name: "rear" for name in TEST_VARIANTS}
 
 # In-plane direction every cap's original +Z stem axis is turned to
 # once it has been laid down, so the stems all point the same way on
@@ -145,16 +127,8 @@ def seat(tris):
     return translate(tris, -cx, -cy, -mnz)
 
 
-def prep_rot(tris, deg):
-    """Tip a cap `deg` about Y, then seat it. +SIDE_ROT_Y puts the
-    right side wall on the bed, -SIDE_ROT_Y the left one."""
-    return seat(rot_y(tris, deg) if deg else tris)
 
 
-def prep(tris, side):
-    """Orient a single cap: optional side tip, then drop onto z=0 and
-    center its footprint on the origin."""
-    return prep_rot(tris, SIDE_ROT_Y if side else 0)
 
 
 def stem_dir_after(rot, deg):
@@ -206,7 +180,7 @@ def main_side_faces(tris):
     for a, b, c in tris:
         nx, ny, nz = tri_normal(a, b, c)
         horizontal = max(abs(nx), abs(ny))
-        if not (0.05 < nz < 0.85 and horizontal > 0.60):
+        if not (-0.08 < nz < 0.85 and horizontal > 0.60):
             continue
         if abs(nx) >= abs(ny):
             side = "right" if nx > 0 else "left"
@@ -345,21 +319,6 @@ def write_stl(path, tris):
             f.write(struct.pack("<H", 0))
 
 
-def side_tip_angle(tris, side):
-    """Rotation about Y that lays the named outer side wall flat on the
-    bed, derived from that wall's own normal.
-
-    A single fixed angle is not enough: a Normal cap's side wall leans
-    12.8 deg from vertical, but a tilted cap's leans only 7.8 deg
-    because its top edge is raked. Tipping both by the same amount
-    leaves the tilted cap resting on one edge with the rest of the wall
-    lifted off the plate, which the slicer then fills with support.
-    """
-    for f in main_side_faces(tris):
-        if f["side"] == side:
-            nx, _, nz = f["normal"]
-            return 180.0 - math.degrees(math.atan2(nx, nz))
-    return SIDE_ROT_Y if side == "right" else -SIDE_ROT_Y
 
 
 def rear_tip_angle(tris):
@@ -376,7 +335,7 @@ def rear_tip_angle(tris):
         if f["side"] == "rear":
             _, ny, nz = f["normal"]
             return math.degrees(math.atan2(ny, nz)) - 180.0
-    return -SIDE_ROT_Y
+    return -90.0
 
 
 def cap_cells(side):
@@ -385,9 +344,7 @@ def cap_cells(side):
     for name, count in BOM:
         tris = load(os.path.join(STL_DIR, PREFIX + name + ".stl"))
         p = (tip_seat_align(tris, rot_x, rear_tip_angle(tris))
-             if side and name in REAR_DOWN_VARIANTS
-             else tip_seat_align(tris, rot_y, side_tip_angle(tris, "right"))
-             if side else prep_rot(tris, 0))
+             if side else seat(tris))
         (mnx, mny, _), (mxx, mxy, _) = bounds(p)
         caps += [(p, mxx - mnx, mxy - mny)] * count
     return caps
@@ -417,62 +374,6 @@ def build(side, out):
           f"bbox {mxx-mnx:.1f} x {mxy-mny:.1f} x {mxz-mnz:.1f} mm "
           f"({'FITS' if max(mxx-mnx, mxy-mny) <= BED else 'TOO BIG'})")
 
-
-def hand_cells(side):
-    """One hand's worth of caps, each tipped onto a flat outer wall.
-
-    Flat caps go onto the hand's own `side` wall ("left" or "right").
-    Tilted caps go onto their rear wall instead: their side walls are
-    warped by the rake (see rear_tip_angle), while the rear wall is
-    both planar and the largest of the four."""
-    caps = []
-    for name, count in HAND_BOM:
-        tris = load(os.path.join(STL_DIR, PREFIX + name + ".stl"))
-        p = (tip_seat_align(tris, rot_x, rear_tip_angle(tris))
-             if name in REAR_DOWN_VARIANTS
-             else tip_seat_align(tris, rot_y, side_tip_angle(tris, side)))
-        (mnx, mny, _), (mxx, mxy, _) = bounds(p)
-        caps += [(p, mxx - mnx, mxy - mny)] * count
-    return caps
-
-
-def build_hands(out):
-    """Full 36-cap Corne set in one go, with the left hand's caps lying
-    on their left side wall and the right hand's on their right side
-    wall. The rear block is the left hand, the front block the right."""
-    groups = [
-        ("left", sorted(hand_cells("left"), key=lambda c: c[2])),
-        ("right", sorted(hand_cells("right"), key=lambda c: c[2])),
-    ]
-    cw = max(c[1] for _, g in groups for c in g) + GAP
-    usable = BED - 2 * MARGIN
-    cols = max(1, int(usable // cw))
-    row_sets = [[g[i:i + cols] for i in range(0, len(g), cols)]
-                for _, g in groups]
-
-    W = cols * cw
-    H = sum(max(c[2] for c in r) + GAP for rs in row_sets for r in rs) \
-        + HAND_GAP * (len(row_sets) - 1)
-
-    plate, y = [], H / 2
-    for gi, rs in enumerate(row_sets):
-        if gi:
-            y -= HAND_GAP
-        for r in rs:
-            rh = max(c[2] for c in r) + GAP
-            for col, (tris, _, _) in enumerate(r):
-                x = -W / 2 + cw / 2 + col * cw
-                plate += translate(tris, x, y - rh / 2, 0)
-            y -= rh
-
-    write_stl(out, plate)
-    (mnx, mny, mnz), (mxx, mxy, mxz) = bounds(plate)
-    total = sum(len(g) for _, g in groups)
-    print(f"{os.path.basename(out)}: {total} caps "
-          f"({len(groups[0][1])} left-side-down + {len(groups[1][1])} "
-          f"right-side-down), {cols} cols, bbox "
-          f"{mxx-mnx:.1f} x {mxy-mny:.1f} x {mxz-mnz:.1f} mm "
-          f"({'FITS' if max(mxx-mnx, mxy-mny) <= BED else 'TOO BIG'})")
 
 
 def build_test(out):
@@ -527,15 +428,12 @@ def build_test(out):
 if __name__ == "__main__":
     out_dir = sys.argv[1] if len(sys.argv) > 1 else "."
     mode = sys.argv[2] if len(sys.argv) > 2 else "all"
-    if mode not in {"all", "full", "test", "hands"}:
-        raise SystemExit("mode must be one of: all, full, test, hands")
+    if mode not in {"all", "full", "test"}:
+        raise SystemExit("mode must be one of: all, full, test")
     os.makedirs(out_dir, exist_ok=True)
-    if mode in {"all", "hands"}:
-        build_hands(os.path.join(
-            out_dir, "Plate_A1mini_Corne36_LeftRight.stl"))
     if mode in {"all", "full"}:
+        build(True, os.path.join(out_dir, "Plate_A1mini_Corne36_RearDown.stl"))
         build(False, os.path.join(out_dir, "Plate_A1mini_BottomDown.stl"))
-        build(True, os.path.join(out_dir, "Plate_A1mini_SideDown.stl"))
     if mode in {"all", "test"}:
         build_test(os.path.join(
             out_dir, "Plate_A1mini_Test_OneEach_RearSideDown.stl"))

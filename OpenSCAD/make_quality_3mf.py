@@ -28,6 +28,7 @@ REAR_SIDE_DOWN_VARIANTS = {
     "Normal",
     "Normal_Homing",
     "Normal_Tilted",
+    "1.5U_Normal",
 }
 
 DISPLAY_NAMES = {

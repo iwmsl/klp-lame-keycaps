@@ -50,6 +50,11 @@ chiclet_edge_round = 1.3;
 skirt_height = 1.5;
 // skirt: side inset per side above the skirt
 skirt_inset = 1.5;
+// Inset of the rear top edge (mm). 0 makes the rear wall vertical, so
+// a cap printed rear-face-down has no outward-leaning outer surface:
+// crown, rim and side walls all come out vertical or facing up, which
+// eliminates the perimeter curl that side-down printing suffered from.
+rear_inset = 0;
 // Corner radius of the bottom footprint (vertical corners)
 corner_radius = 1.9;
 // Corner radius of the top face (vertical corners)
@@ -64,9 +69,11 @@ bottom_edge_round = 0.4;
 dish_depth = 1.15;
 // Radius of the spherical dish (smaller = deeper/rounder scoop)
 dish_radius = 28;
-// Tilt angle for tilted variants. Gentle, so the tilted rows read as a
-// continuation of the home row rather than a step up from it.
-tilt_angle = 8;
+// Tilt angle for tilted variants. Gentle enough that the tilted rows
+// read as a continuation of the home row, but with a clear rake. With
+// the vertical rear wall, any tilt >= 0 also means the crown faces
+// upward when the cap is printed rear-face-down.
+tilt_angle = 10;
 // Crown height at the front footprint edge for tilted variants. Setting
 // this to crown_height makes the tilted cap's near edge meet the home
 // row at the same height — a seamless bowl across the three rows.
@@ -132,8 +139,13 @@ side_inset = side_style == "chiclet" ? chiclet_inset
            :                           top_inset;
 top_edge_r = side_style == "chiclet" ? chiclet_edge_round : top_edge_round;
 
+// Top face: symmetric side insets, but an independent (default zero)
+// rear inset, so the rear wall stands vertical for printing. The face
+// centre shifts rearward by top_off_y; the dish and homing features
+// follow it so the top still reads as centred.
 top_w = cap_w - 2 * side_inset;
-top_d = cap_d - 2 * side_inset;
+top_d = cap_d - side_inset - rear_inset;
+top_off_y = (side_inset - rear_inset) / 2;
 
 // Sagitta of a circle: rise of the arc at horizontal offset w from apex
 function sag(r, w) = r - sqrt(r * r - w * w);
@@ -187,9 +199,9 @@ module cap_body() {
                 plate(cap_w, cap_d, corner_radius);
         // flat tapered sides up to just below the crown, then rounded
         // top edge into the (inset) crown face
-        top_frame() translate([0, 0, -top_edge_r])
+        top_frame() translate([0, top_off_y, -top_edge_r])
             plate(top_w, top_d, top_corner_radius);
-        top_frame()
+        top_frame() translate([0, top_off_y, 0])
             plate(top_w - 2 * top_edge_r, top_d - 2 * top_edge_r,
                   max(top_corner_radius - top_edge_r, 0.1));
     }
@@ -199,9 +211,10 @@ module cap_body() {
 // crown. Stretched along X for wide (1.5U+) caps.
 module dish_sphere() {
     top_frame()
-        scale([dish_sx, 1, 1])
-            translate([0, 0, dish_radius - dish_depth])
-                sphere(r = dish_radius);
+        translate([0, top_off_y, 0])
+            scale([dish_sx, 1, 1])
+                translate([0, 0, dish_radius - dish_depth])
+                    sphere(r = dish_radius);
 }
 
 module cap_top() {
@@ -217,13 +230,14 @@ module cap_top() {
 module homing_features() {
     if (homing == "bar")
         top_frame()
-            translate([0, -homing_offset, surf_z(-homing_offset) + homing_height - 1])
+            translate([0, top_off_y - homing_offset,
+                       surf_z(-homing_offset) + homing_height - 1])
                 linear_extrude(1)
                     rrect(bar_length, bar_width, bar_width / 2 - eps);
     if (homing == "dots")
         top_frame()
             for (dx = [-dot_spacing, 0, dot_spacing])
-                translate([dx, -homing_offset,
+                translate([dx, top_off_y - homing_offset,
                            surf_z(-homing_offset) + homing_height - dot_radius])
                     sphere(r = dot_radius);
 }

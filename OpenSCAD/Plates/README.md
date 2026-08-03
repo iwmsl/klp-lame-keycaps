@@ -2,7 +2,7 @@
 
 Ready-to-slice plates for the angular remix, pre-arranged to fit the
 A1 mini's 180 × 180 mm bed. Start with the four-cap trial plate, then
-print the whole set with `Plate_A1mini_Corne36_LeftRight.stl`.
+print the whole set with `Plate_A1mini_Corne36_RearDown.stl`.
 
 Caps used: **MX Stem + MX Size** (18 × 18 mm footprint, chiclet
 sidewalls, for a 19 mm pitch).
@@ -52,51 +52,23 @@ than minimum support material. For a support-minimized print, disable
 automatic supports and paint Tree supports only beneath the stem boss
 and the first floating edges.
 
-## Corne set, both hands in one print — `Plate_A1mini_Corne36_LeftRight.stl`
+## Corne set, one plate — `Plate_A1mini_Corne36_RearDown.stl`
 
-The whole 36-cap set on a single plate, split into two blocks by print
-orientation:
+All 36 caps laid on their **rear wall** (the taller, +Y side in the
+model's top view). The rear wall is vertical by design (`rear_inset =
+0`), so once a cap is tipped onto it every outer surface is either
+vertical or facing up — **no outward-leaning outer surface anywhere**.
+That removes the perimeter curl that made side-down prints collide
+with the nozzle: each layer's outer perimeter now sits directly on the
+one below instead of hanging past it.
 
-| Block | Hand | Flat caps | Tilted caps |
-| :---- | :--- | :-------- | :---------- |
-| Rear (+Y) | Left | on the cap's **left** side wall | on the **rear** wall |
-| Front (−Y) | Right | on the cap's **right** side wall | on the **rear** wall |
-
-The caps themselves are left-right symmetric, so both hands use the
-same parts — only the orientation differs. Printing each hand on its
-own side means the support scars and any elephant foot end up on
-mirrored walls, so the assembled keyboard stays symmetric.
-
-The tip angle is taken from **each model's own wall normal**, not from
-one shared constant: a Normal cap's side wall leans 12.8° from
-vertical, but Normal Tilted's leans only 7.8° because its top edge is
-raked. Tipping both by the same amount would leave the tilted cap
-balanced on one edge with the rest of the wall lifted off the plate.
-
-**Tilted caps additionally go rear-wall-down on both hands.** The rake
-lifts the top edge while the bottom rim stays level, so the two edges
-of a tilted cap's left and right walls are skew and the wall between
-them is a twisted ruled surface — 0.19 mm of warp, about two layers.
-Even at the correct tip angle only 40.0 mm² of that 64.7 mm² wall
-really touches the plate, and the slicer props up the rest. The front
-and rear walls keep parallel top and bottom edges and so stay truly
-flat (0.026 mm, same as a Normal cap), and the rear one is the taller
-and larger of the two: **77.6 mm² of real contact**. Tilted caps serve
-both the top and the bottom row (rotated 180°), so their left and
-right walls swap sides depending on the row anyway — mirroring them
-would buy nothing.
-
-Finally every cap is spun in the build-plate plane so all 36 stems
-point the same way (`STEM_ANGLE_DEG`). Before this the three tip paths
-left stems at 0°, 90° and 180°; an in-plane spin does not change the
-contact face or its area, but it does make support, seam and cooling
-behave identically on every cap.
-
-- Size: approximately **156.1 × 91.0 × 26.8 mm** — fits the bed
-- 18 caps per block: 10 × Normal Tilted, 6 × Normal, 1 × Normal
-  Homing, 1 × 1.5U Normal
-- Bed contact: **45.7 mm²** flat caps, **77.6 mm²** tilted. Caps stand
-  up to 26.8 mm tall, so use tree supports and an **8 mm brim**
+- Size: approximately **155.3 × 69.5 × 18.0 mm** — fits the bed
+- Bed contact: Normal / Homing 46.5 mm², Tilted 90.7 mm²,
+  1.5U Normal 77.9 mm²
+- All 36 stems point the same way, so support, seam and cooling behave
+  identically on every cap
+- Caps stand 18 mm tall on a modest footprint: tree supports and an
+  **8 mm brim** are still recommended
 
 ## Full 36-key Corne set
 
@@ -110,12 +82,8 @@ behave identically on every cap.
 
 | File | Orientation | Notes |
 | :--- | :--- | :--- |
-| `Plate_A1mini_SideDown.stl` | **側面を下** — cap laid on a side wall | Layer lines run across the top, so **no tactile layer bumps on the touch surface** (best feel). Needs supports for the overhangs; the drafted side wall gives a flat, stable base. Recommended. |
 | `Plate_A1mini_BottomDown.stl` | **底面を下** — cap upright, stem/bottom toward the bed | Simplest layout, top faces up. The top prints as stacked layers (visible rings / slight tactile bumps). Rests on the Ø5.5 MX stem boss + skirt; use supports + a brim. |
 
-Both plates fit the bed:
-
-- SideDown : ~157 × 60 mm, 26.8 mm tall (12 cols; tilted caps rear-down)
 - BottomDown: ~150 × 165 mm, 8.5 mm tall (5 cols)
 
 ## Slicing (Bambu Studio, A1 mini)
@@ -137,15 +105,12 @@ Plates are generated from the built STLs:
 
 ```sh
 ./build.sh                          # build caps and every plate
-python3 make_plate.py Plates hands  # both-hands left/right plate only
 python3 make_plate.py Plates test   # trial plate only
-python3 make_plate.py Plates full   # the two single-orientation plates
+python3 make_plate.py Plates full   # the two full-set plates
 python3 make_plate.py Plates        # all of them
 ```
 
-Edit `BOM` (single-orientation plates) or `HAND_BOM` (per hand, used
-by the left/right plate) in `make_plate.py` to change counts. Edit
-`TEST_VARIANTS` to
+Edit `BOM` in `make_plate.py` to change counts. Edit `TEST_VARIANTS` to
 change the trial set; its minimum-contact orientation is recalculated
 from each STL automatically.
 

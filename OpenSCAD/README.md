@@ -18,7 +18,7 @@ original STLs, so switch fit is identical to the originals.
 
 - **角ばった形状** — 側面はフラット、稜線のみ軽い丸め。19mmピッチ向けに底面18×18mm
 - **皿状の天面は維持** — 元と同じ球面ディッシュ(中央がくぼみ四辺へ持ち上がる)。
-  Tilted は 8° に緩め、前端をホーム段と同じ高さにして段差なくつなげています
+  Tilted は 10° 傾斜。前端をホーム段と同じ高さにして段差なくつなげています
 - **低背化** — クラウン高さ 5.0 mm(オリジナル約 5.6 mm より低い)、
   指の当たる谷底は約 3.9 mm
 - **互換ステム** — Choc(2本足 1.15×2.95、間隔5.7)/ MX(Ø5.5 ボス+十字)
@@ -33,7 +33,7 @@ original STLs, so switch fit is identical to the originals.
 | :--- | :--- |
 | Normal | 皿状のくぼみを持つ基本形 |
 | Normal Homing | Normal+ホーミングバー |
-| Normal Tilted | 8° 傾斜(上下段用) |
+| Normal Tilted | 10° 傾斜(上下段用) |
 | 1.5U Normal | Normal の 1.5U 幅版(親指用) |
 
 ビルド済み STL は `STL/` 以下(`build.sh` で再生成できます)。
@@ -60,9 +60,8 @@ original STLs, so switch fit is identical to the originals.
 
 | ファイル | 向き | 特徴 |
 | :--- | :--- | :--- |
-| **`Plates/Plate_A1mini_Corne36_LeftRight.stl`** | **左手分は左側面、右手分は右側面を下。Tiltedのみ両手とも後面(側面はねじれ面のため)** | **36キー一括。奥=左手18個 / 手前=右手18個。156×91mm、8mmブリム推奨。全36本のステム方向を統一** |
+| **`Plates/Plate_A1mini_Corne36_RearDown.stl`** | **全キャップ後面(垂直な壁)を下** | **36キー一括。外側にせり出す面が一切ないのでカール・ノズル衝突が起きません。155×70mm、8mmブリム推奨** |
 | `Plates/Plate_A1mini_Test_OneEach_RearSideDown.stl` | Normal / Normal Tilted は後側面を下、ほかは自動選択面 | 全4種を各1個。8mmブリム推奨 |
-| `Plates/Plate_A1mini_SideDown.stl` | 側面を下(横倒し) | 天面に積層痕が出ず手触り良好。サポート要(推奨) |
 | `Plates/Plate_A1mini_BottomDown.stl` | 底面を下(上向き) | 配置が単純。天面は積層痕が出る。サポート＋ブリム推奨 |
 
 試作版の内訳: Normal / Normal Homing / Normal Tilted / 1.5U Normal を各1個。
@@ -70,7 +69,7 @@ original STLs, so switch fit is identical to the originals.
 36キー版の内訳: Normal Tilted×20 / Normal×12(ホーム段8＋1U親指4) /
 Normal Homing×2 / 1.5U Normal×2 = 36。
 
-![](../Assets/KLP-Lame-Angular-Plate-SideDown.png)
+![](../Assets/KLP-Lame-Angular-Plate-Corne36-LeftRight.png)
 
 ## 使い方 / Usage
 
@@ -91,7 +90,8 @@ F6 → STL エクスポート。主なパラメータ:
 | `side_style` | chiclet | chiclet / wide / skirt(上表参照) |
 | `top_edge_round` | 1.0 | 上端稜線の丸め |
 | `corner_radius` | 1.9 | 底面の角R(小さいほど角ばる) |
-| `tilt_angle` / `tilt_front_height` | 8 / 5.0 | Tilted の傾斜角と前端高さ。前端＝`crown_height` でホーム段と段差なし |
+| `rear_inset` | 0 | 後面上端のインセット。0で後面が垂直になり、後面を下にした印刷でオーバーハングが消えます |
+| `tilt_angle` / `tilt_front_height` | 10 / 5.0 | Tilted の傾斜角と前端高さ。前端＝`crown_height` でホーム段と段差なし |
 
 ※ 谷底(`crown_height` − `dish_depth`)− 空洞深さ(約2.0)が天板の最小厚です。
 既定値で約 1.85 mm。FDM なら 1.0 mm 以上を推奨します。
