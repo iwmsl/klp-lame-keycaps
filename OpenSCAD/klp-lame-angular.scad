@@ -6,7 +6,8 @@
 // all four edges, rolling off over the front/back walls), at a
 // slightly reduced overall height. Stem and cavity dimensions are
 // taken from the original KLP Lamé STLs, so switch fit is identical
-// to the proven originals.
+// to the proven originals; where the inside is shaped for printing
+// instead, it is only ever in the direction that adds clearance.
 //
 // Designed for FDM printing (tested target: Bambu Lab A1 mini,
 // 0.4 mm nozzle) and resin printing.
@@ -20,7 +21,7 @@
 // Switch stem type
 stem_type = "choc"; // [choc, mx]
 // Keycap footprint size
-size_type = "choc"; // [choc, mx]
+size_type = "choc"; // [choc, mx, mx_tight]
 // Key width in units (1.5U is stretched horizontally, stem centered)
 key_units = 1; // [1:0.25:2]
 // Key depth in units (stretched front-to-back, stem centered)
@@ -50,13 +51,6 @@ chiclet_edge_round = 1.3;
 skirt_height = 1.5;
 // skirt: side inset per side above the skirt
 skirt_inset = 1.5;
-// Inset of the rear top edge (mm). Negative keeps it equal to the side
-// inset, i.e. a front/back symmetric cap — the default. Setting it to 0
-// stands the rear wall vertical, which was tried as a print fix but
-// barely helps: the top rounding and corner radii still flare, so a
-// rear-down cap keeps ~243 mm2 of outward-leaning surface spread over
-// its whole height (vs ~258 mm2 symmetric). Print upright instead.
-rear_inset = -1;
 // Shape of the four vertical corners. "round" is a true radius, whose
 // tangent runs ~90 deg where it meets a wall — printed on that wall it
 // flares almost horizontally out of the first layers and curls into
@@ -81,23 +75,34 @@ bottom_edge_round = 0;
 dish_depth = 1.15;
 // Radius of the spherical dish (smaller = deeper/rounder scoop)
 dish_radius = 28;
-// Tilt angle for tilted variants. Gentle enough that the tilted rows
-// read as a continuation of the home row, but with a clear rake. With
-// the vertical rear wall, any tilt >= 0 also means the crown faces
-// upward when the cap is printed rear-face-down.
-tilt_angle = 10;
+// Tilt angle for tilted variants. Enough rake that the row above and
+// below the home row meet the fingertip square-on rather than reading
+// as a slightly canted flat cap. Every degree here also raises the
+// cap's rear edge by cap_d * sin(tilt) — at 15 deg on an 18.5 mm cap
+// the rear crown lands 4.8 mm above the front one.
+tilt_angle = 15;
 // Crown height at the front footprint edge for tilted variants. Setting
 // this to crown_height makes the tilted cap's near edge meet the home
 // row at the same height — a seamless bowl across the three rows.
 tilt_front_height = 5.0;
 
 /* [Shell] */
-// Wall thickness at the bottom rim
-wall_bottom = 1.0;
-// Cavity inset per side at the ceiling (controls wall taper)
-cavity_top_inset = 1.7;
-// Chamfer along the inner bottom edge (print stability, as in v1.1)
-inner_chamfer = 0.5;
+// How much the cavity flares out per side between the rim and the
+// ceiling, i.e. how much thinner the wall is where it meets the roof.
+//
+// The cavity used to narrow going up, which left its walls leaning
+// 30 deg in over the void — tipped for printing, an 80 deg overhang
+// across 32 mm2, by a wide margin the worst surface on the cap. Flaring
+// it the other way tips those same walls away from the void, so they
+// print as self-supporting faces instead. It costs nothing in fit: the
+// switch housing narrows as it rises, so a cavity that widens on the way
+// up only ever gains clearance.
+cavity_flare = 0.25;
+// Wall the flare must leave where the cavity meets the roof. The flare
+// is taken out of whatever the wall can spare above this and no more, so
+// a footprint with a thin rim simply ends up with a straight cavity
+// rather than a wall the nozzle cannot lay down.
+wall_min = 0.6;
 
 /* [Homing] */
 // Raised bar: length
@@ -121,16 +126,18 @@ eps = 0.01;
 // ------------------------------------------------------------------
 // Derived dimensions
 // ------------------------------------------------------------------
-// Footprints measured from the original STLs:
-//   choc size: 17.5 x 16.5 mm, mx size: 18 x 18 mm
-//   1.5U choc: 26.5 x 16.5 mm (= 17.5 + 0.5 * 18 mm pitch), as in the
-//   original 1.5U models. Wider caps grow along X, stem stays centered.
-// choc size: 17.5 x 16.5 on 18/17 mm pitch
-// mx size  : 18 x 18 on 19 mm pitch (1 mm gap between caps at the rim)
-base_w = size_type == "choc" ? 17.5 : 18.0;
-base_d = size_type == "choc" ? 16.5 : 18.0;
-pitch_x = size_type == "choc" ? 18.0 : 19.0;
-pitch_y = size_type == "choc" ? 17.0 : 19.0;
+// Footprints. The first two are measured from the original STLs; the
+// third is those caps closed up onto the 19.05 mm pitch a Corne v4 Mini
+// actually uses, which is where its half millimetre goes.
+//   choc     : 17.5 x 16.5 on 18/17 mm pitch  (0.5 mm gap at the rim)
+//   mx       : 18   x 18   on 19    mm pitch  (1.0 mm gap)
+//   mx_tight : 18.5 x 18.5 on 19.05 mm pitch  (0.55 mm gap)
+// Wider caps grow by whole pitches along X, so a 1.5U choc cap comes out
+// 26.5 mm as in the original 1.5U models, and the stem stays centered.
+base_w = size_type == "choc" ? 17.5 : size_type == "mx_tight" ? 18.5 : 18.0;
+base_d = size_type == "choc" ? 16.5 : size_type == "mx_tight" ? 18.5 : 18.0;
+pitch_x = size_type == "choc" ? 18.0 : size_type == "mx_tight" ? 19.05 : 19.0;
+pitch_y = size_type == "choc" ? 17.0 : size_type == "mx_tight" ? 19.05 : 19.0;
 cap_w = base_w + (key_units   - 1) * pitch_x;
 cap_d = base_d + (key_units_y - 1) * pitch_y;
 
@@ -151,14 +158,26 @@ side_inset = side_style == "chiclet" ? chiclet_inset
            :                           top_inset;
 top_edge_r = side_style == "chiclet" ? chiclet_edge_round : top_edge_round;
 
-// Top face: symmetric side insets, but an independent (default zero)
-// rear inset, so the rear wall stands vertical for printing. The face
-// centre shifts rearward by top_off_y; the dish and homing features
-// follow it so the top still reads as centred.
-rear_in = rear_inset < 0 ? side_inset : rear_inset;
+// Top face: the same inset on all four sides. Standing the rear wall up
+// on its own was tried as a print fix and dropped — it left the cap
+// front/back asymmetric for a gain the tip angle gives for free.
 top_w = cap_w - 2 * side_inset;
-top_d = cap_d - side_inset - rear_in;
-top_off_y = (side_inset - rear_in) / 2;
+top_d = cap_d - 2 * side_inset;
+
+// Wall at the rim. The cavity has to clear the same switch whatever the
+// footprint, so mx_tight spends its extra 0.5 mm on the rim rather than
+// on a wider cavity: 1.25 mm of wall leaves the same 16.0 mm mouth the
+// 18 mm mx cap has, and the original 1.0 mm elsewhere.
+wall_bottom = size_type == "mx_tight" ? 1.25 : 1.0;
+
+// The outer wall leans in as it rises, so it eats into the wall by the
+// time the cavity reaches its ceiling all on its own. Whatever is left
+// above wall_min, up to cavity_flare, is what the cavity may flare by —
+// which on the thin-rimmed footprints comes out at zero, leaving them a
+// straight cavity instead of an unprintable wall.
+outer_thin = side_inset * cavity_depth / (crown_height - top_edge_r);
+flare = min(cavity_flare, max(0, wall_bottom - outer_thin - wall_min));
+wall_top = wall_bottom - flare;
 
 // Sagitta of a circle: rise of the arc at horizontal offset w from apex
 function sag(r, w) = r - sqrt(r * r - w * w);
@@ -205,9 +224,14 @@ module top_frame() {
 // ------------------------------------------------------------------
 module cap_body() {
     hull() {
-        // rounded bottom edge
-        plate(cap_w - 2 * bottom_edge_round, cap_d - 2 * bottom_edge_round,
-              max(corner_radius - bottom_edge_round, 0.1));
+        // Rounded bottom edge. Skipped when the chamfer is off, so the
+        // rim is a single sharp edge: two coincident slabs would leave a
+        // hairline of dead-vertical wall there, and tipped for printing
+        // a vertical face is the worst angle on the outer shell.
+        if (bottom_edge_round > 0)
+            plate(cap_w - 2 * bottom_edge_round,
+                  cap_d - 2 * bottom_edge_round,
+                  max(corner_radius - bottom_edge_round, 0.1));
         translate([0, 0, bottom_edge_round])
             plate(cap_w, cap_d, corner_radius);
         // vertical full-size skirt before the taper starts
@@ -216,9 +240,9 @@ module cap_body() {
                 plate(cap_w, cap_d, corner_radius);
         // flat tapered sides up to just below the crown, then rounded
         // top edge into the (inset) crown face
-        top_frame() translate([0, top_off_y, -top_edge_r])
+        top_frame() translate([0, 0, -top_edge_r])
             plate(top_w, top_d, top_corner_radius);
-        top_frame() translate([0, top_off_y, 0])
+        top_frame()
             plate(top_w - 2 * top_edge_r, top_d - 2 * top_edge_r,
                   max(top_corner_radius - top_edge_r, 0.1));
     }
@@ -228,10 +252,9 @@ module cap_body() {
 // crown. Stretched along X for wide (1.5U+) caps.
 module dish_sphere() {
     top_frame()
-        translate([0, top_off_y, 0])
-            scale([dish_sx, 1, 1])
-                translate([0, 0, dish_radius - dish_depth])
-                    sphere(r = dish_radius);
+        scale([dish_sx, 1, 1])
+            translate([0, 0, dish_radius - dish_depth])
+                sphere(r = dish_radius);
 }
 
 module cap_top() {
@@ -247,14 +270,14 @@ module cap_top() {
 module homing_features() {
     if (homing == "bar")
         top_frame()
-            translate([0, top_off_y - homing_offset,
+            translate([0, -homing_offset,
                        surf_z(-homing_offset) + homing_height - 1])
                 linear_extrude(1)
                     rrect(bar_length, bar_width, bar_width / 2 - eps);
     if (homing == "dots")
         top_frame()
             for (dx = [-dot_spacing, 0, dot_spacing])
-                translate([dx, top_off_y - homing_offset,
+                translate([dx, -homing_offset,
                            surf_z(-homing_offset) + homing_height - dot_radius])
                     sphere(r = dot_radius);
 }
@@ -262,17 +285,18 @@ module homing_features() {
 // ------------------------------------------------------------------
 // Cavity
 // ------------------------------------------------------------------
+// A single frustum flaring from the mouth to the ceiling. The old shape
+// carried a chamfer at the inner bottom edge as well, but a hull can
+// only ever be convex: put a chamfer under a flare and the hull spans
+// straight past it. The flare is that chamfer, run the full height.
 module cavity() {
     hull() {
         translate([0, 0, -eps])
-            plate(cap_w - 2 * (wall_bottom - inner_chamfer),
-                  cap_d - 2 * (wall_bottom - inner_chamfer), corner_radius);
-        translate([0, 0, inner_chamfer])
             plate(cap_w - 2 * wall_bottom,
                   cap_d - 2 * wall_bottom, corner_radius);
         translate([0, 0, cavity_depth])
-            plate(cap_w - 2 * cavity_top_inset,
-                  cap_d - 2 * cavity_top_inset, corner_radius);
+            plate(cap_w - 2 * wall_top,
+                  cap_d - 2 * wall_top, corner_radius);
     }
 }
 
@@ -310,7 +334,19 @@ mx_boss_below = 1.3;
 mx_cross_len = 4.10;
 mx_slot_h = 1.30;  // horizontal arm thickness (y)
 mx_slot_v = 1.20;  // vertical arm thickness (x)
+// Entry lead-in: the first mx_flare_depth of the recess is opened out
+// by mx_flare on every side, as a straight counterbore. A cone would be
+// the kinder lead-in for the switch stem, but its walls lean in over the
+// void from all four sides at once, so tipped for printing it is the
+// steepest thing on the cap — 80 deg where a straight bore is 48. An MX
+// stem's tip is chamfered already and finds a 0.35 mm step on its own.
 mx_flare = 0.35;
+mx_flare_depth = 0.5;
+// Diameter the boss loses between the rim and the roof. Only the part
+// below the rim goes into the switch, so everything above it is free to
+// draft, and a drafted pillar prints a few degrees shallower than a
+// straight one when the cap is tipped.
+mx_boss_taper = 0.45;
 
 module mx_cross(extra) {
     square([mx_cross_len + 2 * extra, mx_slot_h + 2 * extra], center = true);
@@ -318,23 +354,25 @@ module mx_cross(extra) {
 }
 
 module mx_stem() {
+    boss_up = cavity_depth + 0.6;
     difference() {
-        // extend into the roof so the union is watertight; the cross
-        // recess still stops flush with the cavity ceiling as in the
-        // original models
-        translate([0, 0, -mx_boss_below])
-            cylinder(d = mx_boss_d, h = mx_boss_below + cavity_depth + 0.6);
+        union() {
+            // full diameter where it enters the switch
+            translate([0, 0, -mx_boss_below])
+                cylinder(d = mx_boss_d, h = mx_boss_below);
+            // drafted above the rim, extended into the roof so the
+            // union is watertight; the cross recess still stops flush
+            // with the cavity ceiling as in the original models
+            cylinder(d1 = mx_boss_d, d2 = mx_boss_d - mx_boss_taper,
+                     h = boss_up);
+        }
         // cross recess
         translate([0, 0, -mx_boss_below - eps])
             linear_extrude(mx_boss_below + cavity_depth + 2 * eps)
                 mx_cross(0);
-        // entry flare
-        hull() {
-            translate([0, 0, -mx_boss_below - eps])
-                linear_extrude(eps) mx_cross(mx_flare);
-            translate([0, 0, -mx_boss_below + 0.5])
-                linear_extrude(eps) mx_cross(0);
-        }
+        // entry counterbore
+        translate([0, 0, -mx_boss_below - eps])
+            linear_extrude(mx_flare_depth + eps) mx_cross(mx_flare);
     }
 }
 

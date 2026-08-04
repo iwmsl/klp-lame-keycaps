@@ -1,13 +1,13 @@
 // Corne v4 Mini (3x5+3 split) — keycap arrangement preview.
-// Keycaps only, laid out as they'd sit on the board. Requires the
-// MX Stem + Choc Size angular STLs (run build.sh first).
+// Keycaps only, laid out roughly as they'd sit on the board: a sketch
+// for judging how the caps read together, not the board's placement
+// data. Requires the MX Stem + MX Tight Size STLs (run build.sh first).
 
-dir    = "STL/MX Stem + Choc Size/";
-prefix = "MX_Stem_Choc_Size_Angular_";
+dir    = "STL/MX Stem + MX Tight Size/";
+prefix = "MX_Stem_MX_Tight_Size_Angular_";
 
-pitch_x = 18;   // choc-size horizontal spacing
-pitch_y = 17;   // choc-size vertical spacing
-gap     = 40;   // gap between the two halves (inner column to inner column)
+pitch = 19.05; // c4mtb key spacing, both axes
+gap   = 40;    // between the two halves (inner column to inner column)
 
 // Columns from inner-index (0, nearest center) out to pinky (4).
 // Downward stagger of each column (mm), classic Corne finger stagger.
@@ -19,18 +19,19 @@ module cap(name) import(str(dir, prefix, name, ".stl"));
 // thumb cluster fanning below toward the center.
 module hand() {
     for (j = [0 : 4]) {
-        x = -j * pitch_x;
+        x = -j * pitch;
         s = stagger[j];
-        // top & bottom rows: tilted (bottom rotated 180 to slope forward)
-        translate([x, pitch_y - s, 0]) cap("Normal_Tilted");
-        translate([x, -pitch_y - s, 0]) rotate([0, 0, 180]) cap("Normal_Tilted");
+        // top & bottom rows: tilted, the bottom one turned around so
+        // both rake away from the home row
+        translate([x, pitch - s, 0]) cap("Normal_Tilted");
+        translate([x, -pitch - s, 0]) rotate([0, 0, 180]) cap("Normal_Tilted");
         // home row: normal, homing bump on the index home key
         translate([x, -s, 0]) cap(j == 1 ? "Normal_Homing" : "Normal");
     }
-    // thumb cluster: 3 keys fanning down from below the inner columns
-    thumbs = [[3, -34, 12], [-14, -40, 27], [-30, -48, 42]];
-    for (t = thumbs)
-        translate([t[0], t[1], 0]) rotate([0, 0, t[2]]) cap("Thumb");
+    // thumb cluster: 1.5U innermost, then two 1U keys fanning outward
+    translate([3, -34, 0]) rotate([0, 0, 12]) cap("1.5U_Normal");
+    translate([-16, -40, 0]) rotate([0, 0, 27]) cap("Normal");
+    translate([-33, -48, 0]) rotate([0, 0, 42]) cap("Normal");
 }
 
 // Left half (extends left of center) + right half (mirrored).

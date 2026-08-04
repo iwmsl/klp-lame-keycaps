@@ -2,14 +2,15 @@
 """Arrange KLP Lamé Angular keycaps for the Bambu Lab A1 mini.
 
 Reads the built angular STLs and writes:
-  - <out>_Corne36_BottomDown.stl : the whole 36-cap Corne set upright.
-    Recommended: the cap tapers inward going up, so all of its outward-
-    leaning surface sits in the bottom 3 mm, over support, on faces
-    that end up hidden. Nothing above that can curl into the nozzle.
-  - <out>_Corne36_Tipped.stl : the same set tipped TIP_ANGLE_DEG from
-    upright. Recommended: at 45 deg the visible outer shell is
-    self-supporting, so this prints with no support at all, and the
-    layers cross the dish steeply enough to leave no terracing.
+  - <out>_Corne36_Tipped.stl : the whole 36-cap Corne set tipped
+    TIP_ANGLE_DEG from upright. Recommended: nothing on the visible
+    outer shell reaches 45 deg there, so it prints with no support at
+    all, and the layers cross the dish steeply enough to leave no
+    terracing.
+  - <out>_Corne36_BottomDown.stl : the same set upright. The fallback
+    if edge-balanced caps are a problem: the cap tapers inward going
+    up, so all of its outward-leaning surface sits in the bottom 3 mm,
+    over support, on faces that end up hidden.
   - <out>_Test_OneEach_RearSideDown.stl : one of every variant,
     rear-wall-down
 
@@ -25,8 +26,9 @@ BED = 180.0
 MARGIN = 6.0
 GAP = 3.0
 
-STL_DIR = os.path.join(os.path.dirname(__file__), "STL", "MX Stem + MX Size")
-PREFIX = "MX_Stem_MX_Size_Angular_"
+STL_DIR = os.path.join(os.path.dirname(__file__), "STL",
+                       "MX Stem + MX Tight Size")
+PREFIX = "MX_Stem_MX_Tight_Size_Angular_"
 
 # Corne v4 Mini, both hands (36 caps).
 BOM = [
@@ -37,12 +39,8 @@ BOM = [
 ]
 
 
-# Variants laid on their rear wall for the RearDown plate.
-REAR_DOWN_VARIANTS = {"Normal", "Normal_Homing", "Normal_Tilted",
-                      "1.5U_Normal"}
-
-# Every variant, one each. Order is the documented 2 x 2 layout, read
-# left-to-right and top-to-bottom.
+# Every variant, one each. Order is the documented layout, read
+# left-to-right and top-to-bottom across three columns.
 TEST_VARIANTS = [
     "Normal",
     "Normal_Homing",
@@ -50,9 +48,8 @@ TEST_VARIANTS = [
     "1.5U_Normal",
 ]
 
-# Normal and Normal Tilted use the rear outer side face (the upper side
-# in top view). Normal Homing and 1.5U Normal keep their automatically
-# selected side face, which needs less support material.
+# All four go down on the rear outer side face — the upper side in top
+# view — so the trial plate compares like with like.
 TEST_SIDE_OVERRIDES = {name: "rear" for name in TEST_VARIANTS}
 
 # In-plane direction every cap's original +Z stem axis is turned to
@@ -65,23 +62,29 @@ STEM_ANGLE_DEG = 180.0
 # Tip angle from upright for the side-printed plate, chosen so the cap
 # prints with no support at all.
 #
-# What matters is the outer shell, since the cavity and stem are hidden
-# and the cavity ceiling bridges between its walls rather than hanging
-# free. Outer-shell area steeper than 45 deg, by tip angle:
+# Tipping plays the cap's horizontal faces off against its vertical ones:
+# the rim underside and the cavity ceiling end up at 90 minus this angle,
+# the cross recess at the angle itself. The two always sum to 90, so one
+# of them is at 45 or worse whatever is picked, and the margin goes to
+# the large exposed faces rather than a 1.2 mm slot buried in the stem
+# boss. That leaves a window, and the visible shell is flattest across
+# the middle of it (`overhang.py --sweep`):
 #
-#     45 deg -> 35.0 mm2, worst 54 deg
-#     50 deg ->  0.2 mm2, worst 50 deg   <- here
-#     55 deg ->  0.2 mm2, worst 55 deg
-#     90 deg -> 80.8 mm2 (flat on a wall)
+#     tip | outer worst | outer over 45 deg
+#      45 |    45.0     |  65.9 mm2   horizontals go over
+#      46 |    44.0     |   0.0 mm2
+#      48 |    42.0     |   0.0 mm2   <- here
+#      50 |    43.0     |   0.0 mm2
+#      52 |    45.0     | 130.3 mm2   tilted rear wall goes over
 #
-# At 50 deg nothing on the outside of the cap exceeds 50 deg and only
-# 0.2 mm2 even reaches it, so the plate prints with no support. The
-# layers still cross the dish steeply, which keeps the touch surface
-# free of the concentric terraces an upright print leaves.
+# At 48 deg nothing on the outside of any cap in the set passes 42 deg,
+# so the plate prints with no support and with three degrees in hand on
+# both ends. The layers still cross the dish steeply, which keeps the
+# touch surface free of the concentric terraces an upright print leaves.
 #
 # This only works with bottom_edge_round = 0 in the .scad: that 45 deg
 # chamfer becomes a dead-horizontal shelf once the cap is tipped.
-TIP_ANGLE_DEG = 50.0
+TIP_ANGLE_DEG = 48.0
 
 SIDE_PRIORITY = {"left": 0, "right": 1, "front": 2, "rear": 3}
 MIN_MAIN_SIDE_AREA = 10.0
@@ -190,9 +193,13 @@ def normalize(v):
 def main_side_faces(tris):
     """Return the main planar patch for each of the four outer walls.
 
-    The outer drafted walls have an upward-facing normal, whereas the
-    inner cavity walls point downward. Grouping equal normals isolates
-    each flat wall without accidentally selecting a tiny edge chamfer.
+    Grouping triangles by equal normal isolates each flat wall without
+    accidentally selecting a tiny edge chamfer. The cavity walls are
+    drafted the same way round as the outer ones, so they land in this
+    net too, but each is its own group at its own draft angle and the
+    outer wall is by some way the larger — the caller takes the biggest
+    group per side and then checks that the face it picked is really the
+    one the cap comes to rest on.
     """
     groups = {}
     for a, b, c in tris:
@@ -337,23 +344,6 @@ def write_stl(path, tris):
             f.write(struct.pack("<H", 0))
 
 
-
-
-def rear_tip_angle(tris):
-    """Rotation about X that lays the rear outer wall flat on the bed.
-
-    A tilted cap's left/right walls are not planar: the tilt rakes the
-    top edge while the bottom rim stays level, so the two edges are
-    skew and the wall between them is a twisted ruled surface (0.19 mm
-    of warp). Its front and rear walls keep parallel top and bottom
-    edges and so stay flat, and the rear one is the taller — and
-    therefore larger — of the two.
-    """
-    for f in main_side_faces(tris):
-        if f["side"] == "rear":
-            _, ny, nz = f["normal"]
-            return math.degrees(math.atan2(ny, nz)) - 180.0
-    return -90.0
 
 
 def cap_cells(side):
