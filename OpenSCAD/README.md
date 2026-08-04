@@ -60,16 +60,16 @@ original STLs, so switch fit is identical to the originals.
 
 | ファイル | 向き | 特徴 |
 | :--- | :--- | :--- |
-| **`Plates/Plate_A1mini_Corne36_RearDown.stl`** | **全キャップ後面(垂直な壁)を下** | **36キー一括。外側にせり出す面が一切ないのでカール・ノズル衝突が起きません。155×70mm、8mmブリム推奨** |
+| **`Plates/Plate_A1mini_Corne36_BottomDown.stl`**(推奨) | **全キャップ上向き(底面を下)** | **36キー一括。せり出す面が下3mmに全て収まり、上部はゼロ。カール・ノズル衝突が起きません。天面に積層痕は出ます。150×165mm** |
+| `Plates/Plate_A1mini_Corne36_RearDown.stl` | 後面を下 | 天面の仕上がりは良いが、全高17.9mmにわたり約243mm²がせり出すためカールのリスクあり。Zホップ必須。158×70mm |
 | `Plates/Plate_A1mini_Test_OneEach_RearSideDown.stl` | Normal / Normal Tilted は後側面を下、ほかは自動選択面 | 全4種を各1個。8mmブリム推奨 |
-| `Plates/Plate_A1mini_BottomDown.stl` | 底面を下(上向き) | 配置が単純。天面は積層痕が出る。サポート＋ブリム推奨 |
 
 試作版の内訳: Normal / Normal Homing / Normal Tilted / 1.5U Normal を各1個。
 
 36キー版の内訳: Normal Tilted×20 / Normal×12(ホーム段8＋1U親指4) /
 Normal Homing×2 / 1.5U Normal×2 = 36。
 
-![](../Assets/KLP-Lame-Angular-Plate-Corne36-LeftRight.png)
+![](../Assets/KLP-Lame-Angular-Plate-Corne36.png)
 
 ## 使い方 / Usage
 
@@ -90,7 +90,7 @@ F6 → STL エクスポート。主なパラメータ:
 | `side_style` | chiclet | chiclet / wide / skirt(上表参照) |
 | `top_edge_round` | 1.0 | 上端稜線の丸め |
 | `corner_radius` | 1.9 | 底面の角R(小さいほど角ばる) |
-| `rear_inset` | 0 | 後面上端のインセット。0で後面が垂直になり、後面を下にした印刷でオーバーハングが消えます |
+| `rear_inset` | -1 | 後面上端のインセット。負値で側面と同じ＝前後対称(既定)。0にすると後面が垂直になりますが、印刷上の効果はごく僅かです |
 | `tilt_angle` / `tilt_front_height` | 10 / 5.0 | Tilted の傾斜角と前端高さ。前端＝`crown_height` でホーム段と段差なし |
 
 ※ 谷底(`crown_height` − `dish_depth`)− 空洞深さ(約2.0)が天板の最小厚です。
@@ -108,17 +108,18 @@ openscad -o cap.stl -D 'stem_type="mx"' -D 'size_type="mx"' -D 'variant="tilted"
 
 ## Bambu Lab A1 mini での印刷 / Printing
 
-側面がフラットなので **横倒し(左右どちらかの側面を下)** が印刷しやすく、
-天面の積層痕も目立ちにくいです。オリジナル同様の 45° 傾けでも構いません。
-試作プレートでは左右固定ではなく、4つの外側面をモデルごとに解析し、
-実際に接地できる平面のうち面積が最小の面を下にしています。
-接地面を決めた後はプレート面内だけで回転し、すべてのキャップのステム方向を
-揃えています。この回転で接地面と接地面積は変わらず、サポート・シーム・
-冷却の条件が全キャップで同一になります。
+**上向き(底面を下)を推奨します。** キャップは上に向かって細くなる形状なので、
+せり出す面が下3mmに全て収まり、それより上はゼロになります。カールした外周に
+ノズルが当たって失敗する経路が原理的に無くなります。サポート跡もリム裏と
+キャビティ内側(＝装着後は見えない面)だけに付きます。
+代償として天面に同心円状の積層痕が出ます。
+
+横倒し(後面を下)は天面の仕上がりで有利ですが、全高にわたり約243mm²が
+せり出すためカールのリスクがあります。使う場合はZホップを必ず有効にしてください。
 
 - ノズル: 0.4 mm / レイヤー: 0.08–0.12 mm
 - 壁: 4 以上、インフィル: 100%(小さい部品なのでほぼ変わりません)
-- 向き: 側面を下にして横倒し(サポートはステム足周辺のみ、ツリーサポート推奨)
+- 向き: 底面を下(推奨)。サポートはリム裏とキャビティ内側、ツリーサポート推奨
 - 試作プレート: 接地面が小さいため8mmブリム推奨
 - 材料: PLA / PETG(テクスチャPEIプレート)
 - シーム: 後方に寄せる(Seam position: Rear)

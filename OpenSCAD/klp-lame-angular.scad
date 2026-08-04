@@ -50,11 +50,13 @@ chiclet_edge_round = 1.3;
 skirt_height = 1.5;
 // skirt: side inset per side above the skirt
 skirt_inset = 1.5;
-// Inset of the rear top edge (mm). 0 makes the rear wall vertical, so
-// a cap printed rear-face-down has no outward-leaning outer surface:
-// crown, rim and side walls all come out vertical or facing up, which
-// eliminates the perimeter curl that side-down printing suffered from.
-rear_inset = 0;
+// Inset of the rear top edge (mm). Negative keeps it equal to the side
+// inset, i.e. a front/back symmetric cap — the default. Setting it to 0
+// stands the rear wall vertical, which was tried as a print fix but
+// barely helps: the top rounding and corner radii still flare, so a
+// rear-down cap keeps ~243 mm2 of outward-leaning surface spread over
+// its whole height (vs ~258 mm2 symmetric). Print upright instead.
+rear_inset = -1;
 // Corner radius of the bottom footprint (vertical corners)
 corner_radius = 1.9;
 // Corner radius of the top face (vertical corners)
@@ -143,9 +145,10 @@ top_edge_r = side_style == "chiclet" ? chiclet_edge_round : top_edge_round;
 // rear inset, so the rear wall stands vertical for printing. The face
 // centre shifts rearward by top_off_y; the dish and homing features
 // follow it so the top still reads as centred.
+rear_in = rear_inset < 0 ? side_inset : rear_inset;
 top_w = cap_w - 2 * side_inset;
-top_d = cap_d - side_inset - rear_inset;
-top_off_y = (side_inset - rear_inset) / 2;
+top_d = cap_d - side_inset - rear_in;
+top_off_y = (side_inset - rear_in) / 2;
 
 // Sagitta of a circle: rise of the arc at horizontal offset w from apex
 function sag(r, w) = r - sqrt(r * r - w * w);

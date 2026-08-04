@@ -2,10 +2,14 @@
 """Arrange KLP Lamé Angular keycaps for the Bambu Lab A1 mini.
 
 Reads the built angular STLs and writes:
-  - <out>_Corne36_RearDown.stl : the whole 36-cap Corne set laid on the
-    vertical rear wall — the print-optimal orientation, with no
-    outward-leaning outer surface anywhere
-  - <out>_BottomDown.stl : caps upright (bottom/stem toward the bed)
+  - <out>_Corne36_BottomDown.stl : the whole 36-cap Corne set upright.
+    Recommended: the cap tapers inward going up, so all of its outward-
+    leaning surface sits in the bottom 3 mm, over support, on faces
+    that end up hidden. Nothing above that can curl into the nozzle.
+  - <out>_Corne36_RearDown.stl : the same set laid on the rear wall.
+    Better dish finish, but ~243 mm2 of outward-leaning outer surface
+    spread over the full 18 mm height — this is what curled and made
+    the nozzle collide.
   - <out>_Test_OneEach_RearSideDown.stl : one of every variant,
     rear-wall-down
 
@@ -38,9 +42,7 @@ BOM = [
 ]
 
 
-# With the vertical rear wall every cap prints rear-face-down: laid on
-# that wall the crown, rim and side walls are all vertical or face up,
-# so nothing on the outside leans outward as it grows.
+# Variants laid on their rear wall for the RearDown plate.
 REAR_DOWN_VARIANTS = {"Normal", "Normal_Homing", "Normal_Tilted",
                       "1.5U_Normal"}
 
@@ -432,8 +434,10 @@ if __name__ == "__main__":
         raise SystemExit("mode must be one of: all, full, test")
     os.makedirs(out_dir, exist_ok=True)
     if mode in {"all", "full"}:
-        build(True, os.path.join(out_dir, "Plate_A1mini_Corne36_RearDown.stl"))
-        build(False, os.path.join(out_dir, "Plate_A1mini_BottomDown.stl"))
+        build(False, os.path.join(
+            out_dir, "Plate_A1mini_Corne36_BottomDown.stl"))
+        build(True, os.path.join(
+            out_dir, "Plate_A1mini_Corne36_RearDown.stl"))
     if mode in {"all", "test"}:
         build_test(os.path.join(
             out_dir, "Plate_A1mini_Test_OneEach_RearSideDown.stl"))
