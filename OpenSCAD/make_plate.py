@@ -7,18 +7,14 @@ Reads the built angular STLs and writes:
     leaning surface sits in the bottom 3 mm, over support, on faces
     that end up hidden. Nothing above that can curl into the nozzle.
   - <out>_Corne36_Tipped.stl : the same set tipped TIP_ANGLE_DEG from
-    upright. Keeps the smooth dish of a side print while cutting the
-    typical overhang from ~66 deg (flat on a wall) to ~47 deg.
+    upright. Recommended: at 45 deg the visible outer shell is
+    self-supporting, so this prints with no support at all, and the
+    layers cross the dish steeply enough to leave no terracing.
   - <out>_Test_OneEach_RearSideDown.stl : one of every variant,
     rear-wall-down
 
-The tip angle comes from each model's own rear-wall normal (flat caps
-are exactly 90 deg; the tilted cap's wall leans a hair inward), so
-every cap seats dead flat.
-
 All plates are laid out to fit the A1 mini's 180 x 180 mm bed. Import a
-plate into Bambu Studio, add supports (tree, for the overhangs), and
-slice.
+plate into Bambu Studio and slice.
 """
 import math
 import os
@@ -66,16 +62,21 @@ TEST_SIDE_OVERRIDES = {name: "rear" for name in TEST_VARIANTS}
 # the selected contact face or its area.
 STEM_ANGLE_DEG = 180.0
 
-# Tip angle from upright used for the side-printed plate. Laying a cap
-# flat on a wall sounds ideal but is not: the silhouette has to grow
-# from the small contact patch out to the cap's full width, so the
-# typical overhang runs ~66 deg and the outer perimeter curls into the
-# nozzle. Tipping part-way spreads that growth over far more height —
-# the typical overhang bottoms out near 47 deg between 65 and 75 deg,
-# and the layers still cross the dish steeply enough to keep the touch
+# Tip angle from upright for the side-printed plate, chosen so the cap
+# prints with no support at all.
+#
+# What matters is the outer shell, since the cavity and stem are hidden
+# and the cavity ceiling bridges between its walls rather than hanging
+# free. Outer-shell area steeper than 45 deg, by tip angle:
+#
+#     45 deg -> 17.2 mm2      60 deg -> 61.4 mm2
+#     70 deg -> 61.4 mm2      90 deg -> 80.8 mm2  (flat on a wall)
+#
+# At 45 deg practically the whole visible surface is self-supporting,
+# and the layers still cross the dish at 45 deg, which keeps the touch
 # surface free of the concentric terraces an upright print leaves.
-# The original KLP Lame recommends 45-75 deg for the same reason.
-TIP_ANGLE_DEG = 70.0
+# This is the angle the original KLP Lame recommends.
+TIP_ANGLE_DEG = 45.0
 
 SIDE_PRIORITY = {"left": 0, "right": 1, "front": 2, "rear": 3}
 MIN_MAIN_SIDE_AREA = 10.0

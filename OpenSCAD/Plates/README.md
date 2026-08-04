@@ -68,33 +68,34 @@ perimeter can curl up into the nozzle.
   terraces on the touch surface. At 0.08 mm layers the steps are
   ~0.27 mm wide at the dish edge and wider toward the centre.
 
-## Corne set — `Plate_A1mini_Corne36_Tipped.stl` (smooth dish)
+## Corne set — `Plate_A1mini_Corne36_Tipped.stl` (recommended, support-free)
 
-The same 36 caps **tipped 70° from upright** rather than laid flat on a
-wall. Laying a cap flat sounds ideal but is the worst of both worlds:
-the silhouette still has to grow from the small contact patch out to
-the cap's full width, only now it does so within the first millimetre
-or two, so the typical overhang runs ~66° and the outer perimeter
-curls up into the nozzle. Tipping part-way spreads that same growth
-over far more height.
+The 36 caps **tipped 45° from upright**. This prints with **no support
+at all** and leaves no terracing on the touch surface.
 
-Measured typical (p90) overhang per 0.2 mm layer:
+The number that decides the angle is how much of the *outer shell*
+overhangs by more than 45°. The cavity and stem do not count the same
+way: they are hidden inside the switch, and the cavity ceiling bridges
+between its own walls rather than hanging free.
 
-| Tip from upright | Height | Typical overhang |
-| ---------------: | -----: | ---------------: |
-| 0° (upright) | 6.3 mm | 88° |
-| 45° | 14.5 mm | 55° |
-| **70°** | **17.3 mm** | **~47°** |
-| 90° (flat on a wall) | 18.0 mm | 66° |
+| Tip from upright | Outer shell steeper than 45° |
+| ---------------: | ---------------------------: |
+| **45°** | **17.2 mm²** |
+| 60° | 61.4 mm² |
+| 70° | 61.4 mm² |
+| 90° (flat on a wall) | 80.8 mm² |
 
-The optimum is broad and sits between 65° and 75° — the same range the
-original KLP Lamé recommends. At 70° the layers still cross the dish
-steeply, so the touch surface keeps the smooth finish that an upright
-print cannot give.
+At 45° practically the whole visible surface carries itself, and the
+layers cross the dish at 45°, so the steps are ~0.08 mm wide — far
+finer than the concentric terraces an upright print leaves. It is also
+the angle the original KLP Lamé recommends.
 
-- Size: approximately **152.5 × 90.5 × 17.3 mm** — fits the bed
-- Each cap balances on an edge rather than a face, so this plate needs
-  supports and a brim more than the upright one does
+- Size: approximately **154.1 × 111.5 × 14.8 mm** — fits the bed
+- **No support.** A brim is still worth using: each cap balances on an
+  edge, so 3 mm of brim keeps it from being nudged over
+- The cavity and stem will droop slightly where they overhang. Both
+  are hidden; if the stem ends up tight, trim it with Bambu Studio's
+  X-Y hole compensation
 - Set `TIP_ANGLE_DEG` in `make_plate.py` to try another angle
 
 ## Full 36-key Corne set
@@ -110,12 +111,12 @@ print cannot give.
 ## Slicing (Bambu Studio, A1 mini)
 
 - Nozzle 0.4 mm, layer height 0.08–0.12 mm, walls ≥ 4, infill 100 %.
-- **Supports: on, type Tree (auto).** All orientations have overhangs
-  (the hollow underside / stem). BottomDown needs support under the
-  rim and inside the cavity; Tipped under the whole overhanging side.
+- **Supports: off** for the Tipped plate — that is the point of 45°.
+  BottomDown does need support, under the rim and inside the cavity.
 - Material: PLA or PETG.
-- Brim: **8 mm for the minimum-contact trial plate**; 5 mm is normally
-  enough for the two full-set plates.
+- Brim: **3 mm** on the Tipped plate (caps are only 3 mm apart, so a
+  wider brim fuses them all into one sheet and is a chore to remove).
+  8 mm is fine on the four-cap trial plate, where there is room.
 - If the switch fit is tight/loose, tune Bambu Studio's *X-Y hole
   compensation* by ±0.05 mm, or edit the stem params in the `.scad`.
 
