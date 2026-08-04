@@ -69,14 +69,19 @@ STEM_ANGLE_DEG = 180.0
 # and the cavity ceiling bridges between its walls rather than hanging
 # free. Outer-shell area steeper than 45 deg, by tip angle:
 #
-#     45 deg -> 17.2 mm2      60 deg -> 61.4 mm2
-#     70 deg -> 61.4 mm2      90 deg -> 80.8 mm2  (flat on a wall)
+#     45 deg -> 35.0 mm2, worst 54 deg
+#     50 deg ->  0.2 mm2, worst 50 deg   <- here
+#     55 deg ->  0.2 mm2, worst 55 deg
+#     90 deg -> 80.8 mm2 (flat on a wall)
 #
-# At 45 deg practically the whole visible surface is self-supporting,
-# and the layers still cross the dish at 45 deg, which keeps the touch
-# surface free of the concentric terraces an upright print leaves.
-# This is the angle the original KLP Lame recommends.
-TIP_ANGLE_DEG = 45.0
+# At 50 deg nothing on the outside of the cap exceeds 50 deg and only
+# 0.2 mm2 even reaches it, so the plate prints with no support. The
+# layers still cross the dish steeply, which keeps the touch surface
+# free of the concentric terraces an upright print leaves.
+#
+# This only works with bottom_edge_round = 0 in the .scad: that 45 deg
+# chamfer becomes a dead-horizontal shelf once the cap is tipped.
+TIP_ANGLE_DEG = 50.0
 
 SIDE_PRIORITY = {"left": 0, "right": 1, "front": 2, "rear": 3}
 MIN_MAIN_SIDE_AREA = 10.0

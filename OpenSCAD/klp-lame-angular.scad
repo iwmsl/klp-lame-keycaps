@@ -69,8 +69,12 @@ corner_radius = 1.9;
 top_corner_radius = 1.9;
 // Rounding of the top perimeter edge (top face -> side wall)
 top_edge_round = 1.0;
-// Rounding / chamfer of the bottom perimeter edge (side wall -> rim)
-bottom_edge_round = 0.4;
+// Chamfer of the bottom perimeter edge (side wall -> rim). Zero by
+// default: the chamfer only ever relieved elephant foot for a
+// bottom-down print, and it is actively harmful for the tipped print
+// the set is meant for — a 45 deg chamfer tipped ~45 deg turns into a
+// dead-horizontal 8.8 mm2 shelf on the outside of the cap.
+bottom_edge_round = 0;
 
 /* [Top surface] */
 // Depth of the dished scoop at the cap center, below the crown

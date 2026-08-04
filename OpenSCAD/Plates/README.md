@@ -70,32 +70,37 @@ perimeter can curl up into the nozzle.
 
 ## Corne set — `Plate_A1mini_Corne36_Tipped.stl` (recommended, support-free)
 
-The 36 caps **tipped 45° from upright**. This prints with **no support
-at all** and leaves no terracing on the touch surface.
+The 36 caps **tipped 50° from upright**, printed with **no support**.
 
-The number that decides the angle is how much of the *outer shell*
-overhangs by more than 45°. The cavity and stem do not count the same
-way: they are hidden inside the switch, and the cavity ceiling bridges
-between its own walls rather than hanging free.
+What decides the angle is the *outer shell* — the cavity and stem are
+hidden inside the switch, and the cavity ceiling bridges between its
+own walls rather than hanging free. Outer-shell area steeper than 45°:
 
-| Tip from upright | Outer shell steeper than 45° |
-| ---------------: | ---------------------------: |
-| **45°** | **17.2 mm²** |
-| 60° | 61.4 mm² |
-| 70° | 61.4 mm² |
-| 90° (flat on a wall) | 80.8 mm² |
+| Tip | Outer worst | Outer area > 45° |
+| --: | ----------: | ---------------: |
+| 45° | 54° | 35.0 mm² |
+| **50°** | **50°** | **0.2 mm²** |
+| 55° | 55° | 0.2 mm² |
+| 90° (flat on a wall) | 90° | 80.8 mm² |
 
-At 45° practically the whole visible surface carries itself, and the
-layers cross the dish at 45°, so the steps are ~0.08 mm wide — far
-finer than the concentric terraces an upright print leaves. It is also
-the angle the original KLP Lamé recommends.
+Nothing on the outside of a 1U cap exceeds 50°, and only 0.2 mm² even
+reaches it (the wider 1.5U tops out at 56° over 8.5 mm²). The failure
+mode that wrecked the first attempt — an outer perimeter hanging past
+the layer below, curling, and being struck by the nozzle — no longer
+has anything to act on.
 
-- Size: approximately **154.1 × 111.5 × 14.8 mm** — fits the bed
-- **No support.** A brim is still worth using: each cap balances on an
-  edge, so 3 mm of brim keeps it from being nudged over
-- The cavity and stem will droop slightly where they overhang. Both
-  are hidden; if the stem ends up tight, trim it with Bambu Studio's
-  X-Y hole compensation
+This depends on `bottom_edge_round = 0` in the .scad. That 45° chamfer
+existed only to relieve elephant foot on a bottom-down print, and
+tipped ~45° it becomes a dead-horizontal 8.8 mm² shelf on the outside
+of the cap — the single worst overhang on the whole model.
+
+- Size: approximately **150.7 × 111.5 × 15.7 mm** — fits the bed
+- **Supports off.** Use a **3 mm brim**: the caps balance on an edge,
+  and at 3 mm apart a wider brim fuses all 36 into one sheet
+- What is *not* solved: the inside still has 62 mm² over 45°, worst
+  84.5°. It is all hidden, and the ceiling is a bridge rather than a
+  free overhang, but the stem socket may droop enough to tighten the
+  fit. Trim it with X-Y hole compensation if so.
 - Set `TIP_ANGLE_DEG` in `make_plate.py` to try another angle
 
 ## Full 36-key Corne set
