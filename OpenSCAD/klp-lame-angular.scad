@@ -57,7 +57,13 @@ skirt_inset = 1.5;
 // rear-down cap keeps ~243 mm2 of outward-leaning surface spread over
 // its whole height (vs ~258 mm2 symmetric). Print upright instead.
 rear_inset = -1;
-// Corner radius of the bottom footprint (vertical corners)
+// Shape of the four vertical corners. "round" is a true radius, whose
+// tangent runs ~90 deg where it meets a wall — printed on that wall it
+// flares almost horizontally out of the first layers and curls into
+// the nozzle. "chamfer" cuts the same corner at 45 deg, so nothing on
+// the cap ever overhangs by more than 45 deg.
+corner_style = "chamfer"; // [chamfer, round]
+// Corner radius / chamfer of the bottom footprint (vertical corners)
 corner_radius = 1.9;
 // Corner radius of the top face (vertical corners)
 top_corner_radius = 1.9;
@@ -162,7 +168,11 @@ function surf_z(y) = -(dish_depth - sag(dish_radius, y));
 // ------------------------------------------------------------------
 module rrect(w, d, r) {
     rr = max(min(r, w / 2 - eps, d / 2 - eps), 0.05);
-    offset(r = rr) square([w - 2 * rr, d - 2 * rr], center = true);
+    if (corner_style == "chamfer")
+        offset(delta = rr, chamfer = true)
+            square([w - 2 * rr, d - 2 * rr], center = true);
+    else
+        offset(r = rr) square([w - 2 * rr, d - 2 * rr], center = true);
 }
 
 module plate(w, d, r) {

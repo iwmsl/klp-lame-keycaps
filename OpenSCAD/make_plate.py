@@ -6,10 +6,9 @@ Reads the built angular STLs and writes:
     Recommended: the cap tapers inward going up, so all of its outward-
     leaning surface sits in the bottom 3 mm, over support, on faces
     that end up hidden. Nothing above that can curl into the nozzle.
-  - <out>_Corne36_RearDown.stl : the same set laid on the rear wall.
-    Better dish finish, but ~243 mm2 of outward-leaning outer surface
-    spread over the full 18 mm height — this is what curled and made
-    the nozzle collide.
+  - <out>_Corne36_Tipped.stl : the same set tipped TIP_ANGLE_DEG from
+    upright. Keeps the smooth dish of a side print while cutting the
+    typical overhang from ~66 deg (flat on a wall) to ~47 deg.
   - <out>_Test_OneEach_RearSideDown.stl : one of every variant,
     rear-wall-down
 
@@ -66,6 +65,17 @@ TEST_SIDE_OVERRIDES = {name: "rear" for name in TEST_VARIANTS}
 # conditions. Rotating about the build-plate Z axis does not change
 # the selected contact face or its area.
 STEM_ANGLE_DEG = 180.0
+
+# Tip angle from upright used for the side-printed plate. Laying a cap
+# flat on a wall sounds ideal but is not: the silhouette has to grow
+# from the small contact patch out to the cap's full width, so the
+# typical overhang runs ~66 deg and the outer perimeter curls into the
+# nozzle. Tipping part-way spreads that growth over far more height —
+# the typical overhang bottoms out near 47 deg between 65 and 75 deg,
+# and the layers still cross the dish steeply enough to keep the touch
+# surface free of the concentric terraces an upright print leaves.
+# The original KLP Lame recommends 45-75 deg for the same reason.
+TIP_ANGLE_DEG = 70.0
 
 SIDE_PRIORITY = {"left": 0, "right": 1, "front": 2, "rear": 3}
 MIN_MAIN_SIDE_AREA = 10.0
@@ -345,7 +355,7 @@ def cap_cells(side):
     caps = []
     for name, count in BOM:
         tris = load(os.path.join(STL_DIR, PREFIX + name + ".stl"))
-        p = (tip_seat_align(tris, rot_x, rear_tip_angle(tris))
+        p = (tip_seat_align(tris, rot_x, -TIP_ANGLE_DEG)
              if side else seat(tris))
         (mnx, mny, _), (mxx, mxy, _) = bounds(p)
         caps += [(p, mxx - mnx, mxy - mny)] * count
@@ -437,7 +447,7 @@ if __name__ == "__main__":
         build(False, os.path.join(
             out_dir, "Plate_A1mini_Corne36_BottomDown.stl"))
         build(True, os.path.join(
-            out_dir, "Plate_A1mini_Corne36_RearDown.stl"))
+            out_dir, "Plate_A1mini_Corne36_Tipped.stl"))
     if mode in {"all", "test"}:
         build_test(os.path.join(
             out_dir, "Plate_A1mini_Test_OneEach_RearSideDown.stl"))

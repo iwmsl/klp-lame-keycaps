@@ -2,7 +2,7 @@
 
 Ready-to-slice plates for the angular remix, pre-arranged to fit the
 A1 mini's 180 × 180 mm bed. Start with the four-cap trial plate, then
-print the whole set with `Plate_A1mini_Corne36_BottomDown.stl`.
+print the whole set with `Plate_A1mini_Corne36_Tipped.stl`.
 
 Caps used: **MX Stem + MX Size** (18 × 18 mm footprint, chiclet
 sidewalls, for a 19 mm pitch).
@@ -68,20 +68,34 @@ perimeter can curl up into the nozzle.
   terraces on the touch surface. At 0.08 mm layers the steps are
   ~0.27 mm wide at the dish edge and wider toward the centre.
 
-## Corne set — `Plate_A1mini_Corne36_RearDown.stl` (better finish, riskier)
+## Corne set — `Plate_A1mini_Corne36_Tipped.stl` (smooth dish)
 
-The same 36 caps laid on their rear wall. The dish comes out smooth
-because the layers run across it, but **~243 mm² of outward-leaning
-outer surface is spread over the full 17.9 mm of height**. Those
-perimeters hang past the layer below, curl as they cool, and are what
-made the nozzle collide on the first attempt. Standing the rear wall
-vertical was tried and barely helped (258 → 243 mm²), because the top
-rounding and corner radii flare regardless.
+The same 36 caps **tipped 70° from upright** rather than laid flat on a
+wall. Laying a cap flat sounds ideal but is the worst of both worlds:
+the silhouette still has to grow from the small contact patch out to
+the cap's full width, only now it does so within the first millimetre
+or two, so the typical overhang runs ~66° and the outer perimeter
+curls up into the nozzle. Tipping part-way spreads that same growth
+over far more height.
 
-Only use this with Z-hop enabled, overhang slowdown on and maximum
-overhang cooling.
+Measured typical (p90) overhang per 0.2 mm layer:
 
-- Size: approximately **158.3 × 69.5 × 17.9 mm** — fits the bed
+| Tip from upright | Height | Typical overhang |
+| ---------------: | -----: | ---------------: |
+| 0° (upright) | 6.3 mm | 88° |
+| 45° | 14.5 mm | 55° |
+| **70°** | **17.3 mm** | **~47°** |
+| 90° (flat on a wall) | 18.0 mm | 66° |
+
+The optimum is broad and sits between 65° and 75° — the same range the
+original KLP Lamé recommends. At 70° the layers still cross the dish
+steeply, so the touch surface keeps the smooth finish that an upright
+print cannot give.
+
+- Size: approximately **152.5 × 90.5 × 17.3 mm** — fits the bed
+- Each cap balances on an edge rather than a face, so this plate needs
+  supports and a brim more than the upright one does
+- Set `TIP_ANGLE_DEG` in `make_plate.py` to try another angle
 
 ## Full 36-key Corne set
 
@@ -98,7 +112,7 @@ overhang cooling.
 - Nozzle 0.4 mm, layer height 0.08–0.12 mm, walls ≥ 4, infill 100 %.
 - **Supports: on, type Tree (auto).** All orientations have overhangs
   (the hollow underside / stem). BottomDown needs support under the
-  rim and inside the cavity; RearDown under the floating body.
+  rim and inside the cavity; Tipped under the whole overhanging side.
 - Material: PLA or PETG.
 - Brim: **8 mm for the minimum-contact trial plate**; 5 mm is normally
   enough for the two full-set plates.
